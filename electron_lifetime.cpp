@@ -138,17 +138,16 @@ int main(int argc, char**argv) {
 	TTreeReaderArray<Float_t> read_dqdx(treereader, "trk.hits2.dqdx");
 	TTreeReaderArray<Float_t> read_T(treereader, "trk.hits2.h.time");
 	TTreeReaderArray<Float_t> read_t0(treereader, "trk.t0");
-	TTreeReaderArray<Float_t> read_xi(treereader, "trk.start.x");
-	TTreeReaderArray<Float_t> read_xiTruth(treereader, "trk.truth.p.start.x");
-	TTreeReaderArray<Float_t> read_yi(treereader, "trk.start.y");
-	TTreeReaderArray<Float_t> read_zi(treereader, "trk.start.z");
-	TTreeReaderArray<Float_t> read_xf(treereader, "trk.end.x");
-	TTreeReaderArray<Float_t> read_xfTruth(treereader, "trk.truth.p.end.x");
-	TTreeReaderArray<Float_t> read_yf(treereader, "trk.end.y");
-	TTreeReaderArray<Float_t> read_zf(treereader, "trk.end.z");
-	TTreeReaderArray<Float_t> read_E(treereader, "trk.truth.p.startE");
+	TTreeReaderValue<float> read_xi(treereader, "trk.start.x");
+	TTreeReaderValue<float> read_xiTruth(treereader, "trk.truth.p.start.x");
+	TTreeReaderValue<float> read_yi(treereader, "trk.start.y");
+	TTreeReaderValue<float> read_zi(treereader, "trk.start.z");
+	TTreeReaderValue<float> read_xf(treereader, "trk.end.x");
+	TTreeReaderValue<float> read_xfTruth(treereader, "trk.truth.p.end.x");
+	TTreeReaderValue<float> read_yf(treereader, "trk.end.y");
+	TTreeReaderValue<float> read_zf(treereader, "trk.end.z");
+	TTreeReaderValue<float> read_E(treereader, "trk.truth.p.startE");
 	TTreeReaderValue<int> read_selected(treereader, "trk.selected");
-	TTreeReaderArray<uint16_t> read_wire(treereader, "trk.hits2.h.wire");
 
 	//Not AC filtered (yet?). A comparison of initial and final x in reco and truth.
 	if(truth_test){ 
@@ -164,17 +163,17 @@ int main(int argc, char**argv) {
 		//read info into variables
 		treereader.Restart();
 		while(treereader.Next()){
-			int entries = read_xi.GetSize();
-			if(read_xi.GetSize() == 0){entries = 1;}
+			//int entries = read_xi.GetSize();
+			//if(read_xi.GetSize() == 0){entries = 1;}
 
-			for (int i = 0; i < entries; i++){	
+			//for (int i = 0; i < entries; i++){	
 				weights.push_back(1.);
-				xi.push_back(read_xi[i]);
-				xf.push_back(read_xf[i]);
-				xiTruth.push_back(read_xiTruth[i]);
-				xfTruth.push_back(read_xfTruth[i]);
-				xiDif.push_back(read_xiTruth[i] - read_xi[i]);
-				}
+				xi.push_back(*read_xi);
+				xf.push_back(*read_xf);
+				xiTruth.push_back(*read_xiTruth);
+				xfTruth.push_back(*read_xfTruth);
+				xiDif.push_back(*read_xiTruth - *read_xi);
+				//}
         }
 		
 		//function to set nice colour gradient
@@ -219,22 +218,12 @@ int main(int argc, char**argv) {
 	
 	//Histograms
 	TH2D *h_dQdx = new TH2D("h_dQdx","dQ/dx vs x", 100, -200, 200, 75, 200, 1800);
-	TH2D *h_multiwire = new TH2D("h_dQdx","dQ/dx vs x", 100, -200, 200, 75, 200, 1800);
 	TGraph *g_XvT = new TGraph;
 	TH2D *h_dQdx_L = new TH2D("h_dQdx_L","dQ/dx vs t Left TPC", 100, 0, 1.3, 75, 200, 1800);
 	TH2D *h_dQdx_R = new TH2D("h_dQdx_R","dQ/dx vs t Right TPC", 100, 0, 1.3, 75, 200, 1800);
 			
 	int track_count = 0;
 	int overall_count = 0;
-	int N = 10; //no. of wires to group together
-
-	//vector for grouping wires together
-	std::vector<double> dQdx;
-	std::vector<double> wire;
-	std::vector<double> x;
-	std::vector<double> dQdx_av;
-	std::vector<int> count;
-	std::vector<double> x_av;
 
 	treereader.Restart();
 	while(treereader.Next()){
@@ -245,8 +234,9 @@ int main(int argc, char**argv) {
 		if(*read_selected == 1){
 			//std::cout << "Doing if loop" << std::endl;
 			for (int i = 0; i < entries; i++){
+
 				if(std::isnan(read_x[i]) == 0){ //get rid of nan entries
-					
+					dQdx_size += 1;
 					h_dQdx->Fill(read_x[i], read_dqdx[i]);
 					g_XvT->SetPoint(g_XvT->GetN(), read_x[i], read_T[i]/2000 - 0.2 - read_t0[0]/1000000);
 
@@ -262,99 +252,17 @@ int main(int argc, char**argv) {
 				}
 
 			}
-
-			//Remove all nan entries
-			for (int i = 0; i < entries; i++){
-				if(std::isnan(read_x[i]) == 0){ //get rid of nan entries
-					dQdx.push_back(read_dqdx[i]);
-					x.push_back(read_x[i]);
-					wire.push_back(read_wire[i]);
-				}
-			}
-
-
-			auto maxWire = std::max_element(wire.begin(), wire.end());
-			auto minWire = std::min_element(wire.begin(), wire.end());
-			int quotient = (*maxWire - *minWire) / N;
-			//std::cout << quotient << std::endl;
-			dQdx_av.resize(quotient + 1, 0.);
-			x_av.resize(quotient + 1, 0.);
-			count.resize(quotient + 1, 0);
-
-			/*if(track_count == 1){
-				std::cout << *maxWire << std::endl;
-				std::cout << *minWire << std::endl;
-				std::cout << quotient << std::endl;
-				
-				for (int i = 0; i < 100; i++){
-					std::cout << dQdx[i] << std::endl;
-					std::cout << x[i] << std::endl;
-					std::cout << wire[i] << std::endl;
-				}
-
-			}
-
-			std::cout << "........................................................" << std::endl;*/
-
-			for (int i = 0; i < dQdx.size(); i++){
-				//if(track_count == 1){std::cout << (int)((wire[i] - *minWire)/N) << std::endl;}
-				dQdx_av[ (int)((wire[i] - *minWire)/N) ] += dQdx[i];
-				count[ (int)((wire[i] - *minWire)/N) ] += 1;
-				x_av[ (int)((wire[i] - *minWire)/N) ] += x[i];
-
-			}
-
-			for(int i=0; i < dQdx_av.size(); i++){
-				h_multiwire->Fill(x_av[i]/count[i], dQdx_av[i]/count[i]);
-			}
-
-			/*if(track_count == 1){
-				for (int i = 0; i < dQdx_av.size(); i++){
-					std::cout << dQdx_av[i]/count[i] << std::endl;
-					std::cout << x_av[i]/N << std::endl;
-					std::cout << count[i] << std::endl;
-				}
-			}*/
-
-			dQdx_av.clear();
-			wire.clear();
-			x.clear();
-			dQdx.clear();
-			count.clear();
-			x_av.clear();
+			
 			track_count += 1;
 
 
 		}
-		//}
-
-		//double dQdx_av = 0;
-		//if loop for wires to group them into groups of N
-		//find average dQ/dx and x value for these hits
-
-		//double dQdx_av += read_dqdx[i];
-
-		//fill dQ/dx hist with these values
-		//move onto next hit
 		
 		overall_count += 1;
 	}
 	
 	std::cout << "AC track count is " << track_count << std::endl;
 	std::cout << "Overall track count is " << overall_count << std::endl;
-
-	//Multiwire test
-	TCanvas *c_multiwire = new TCanvas();
-	h_multiwire->SetStats(0);
-	h_multiwire->GetXaxis()->SetTitle("x [cm]");
-	h_multiwire->GetYaxis()->SetTitle("dQ/dx [ADc/cm]");
-	histLabels2D(h_multiwire, "cm", "ADC/cm", 3, 3);
-	c_multiwire->SetRightMargin(0.18);
-	c_multiwire->cd();
-	h_multiwire->Draw("COLZ");
-	TPaveText *stats_multiwire = new TPaveText(.55,.80,.80,.88,"blNDC");
-	drawCosmicStats(stats_multiwire,"AC cosmics: %d",track_count);
-	c_multiwire->SaveAs("MultiwireTest.png");
 
 	if(plot_dQdx){
 
@@ -486,20 +394,22 @@ int main(int argc, char**argv) {
 		//fill variables from ROOT data files
 		treereader.Restart();
 		while(treereader.Next()){
-			int entries = read_xi.GetSize();
-			if(read_xi.GetSize() == 0){entries = 1;} //read_XX are arrays, but each track only has one start and end point
+			//int entries = read_xi.GetSize();
+			//if(read_xi.GetSize() == 0){entries = 1;} //read_XX are arrays, but each track only has one start and end point
 
-			for (int i = 0; i < entries; i++){
-				if(read_xi[i] < -199. || read_xi[i] > 199. || read_xf[i] < -199. || read_xf[i] > 199.){ //AC crosser filter
+			//for (int i = 0; i < entries; i++){
+				//if(read_xi[i] < -199. || read_xi[i] > 199. || read_xf[i] < -199. || read_xf[i] > 199.){ //AC crosser filter
+				if(*read_selected == 1){
 					weights.push_back(1.);
-					xi.push_back(read_xi[i]);
-					yi.push_back(read_yi[i]);
-					zi.push_back(read_zi[i]);
-					xf.push_back(read_xf[i]);
-					yf.push_back(read_yf[i]);
-					zf.push_back(read_zf[i]);
+					xi.push_back(*read_xi);
+					yi.push_back(*read_yi);
+					zi.push_back(*read_zi);
+					xf.push_back(*read_xf);
+					yf.push_back(*read_yf);
+					zf.push_back(*read_zf);
 				}
-				}
+				//}
+				//}
         }	
 
 		std::cout << "AC track count 2: " << xi.size() << std::endl;
@@ -586,14 +496,18 @@ int main(int argc, char**argv) {
 		//read in data from ROOT files
 		treereader.Restart();
 		while(treereader.Next()){	
-			int entries = read_E.GetSize();
-			if(read_E.GetSize() == 0){entries = 1;}//read_XX are arrays, but each track only has one energy value
-			for (int i = 0; i < entries; i++){
-				if(read_xi[i] < -199. || read_xi[i] > 199. || read_xf[i] < -199. || read_xf[i] > 199.){//AC crosser filter
-					E.push_back(read_E[i]);   
-					weights.push_back(1.); 
-				}				                 
-			}
+			//int entries = read_E.GetSize();
+			//if(read_E.GetSize() == 0){entries = 1;}//read_XX are arrays, but each track only has one energy value
+			//for (int i = 0; i < entries; i++){
+				//if(read_xi[i] < -199. || read_xi[i] > 199. || read_xf[i] < -199. || read_xf[i] > 199.){//AC crosser filter
+				if(*read_selected == 1){
+					E.push_back(*read_E);   
+					weights.push_back(1.);
+
+				}
+
+				//}				                 
+			//}
 		}
 
 		//Plot energy histogram
