@@ -292,12 +292,12 @@ int main(int argc, char**argv) {
 						g_XvT->SetPoint(g_XvT->GetN(), x_av[i]/count[i], t_av[i]/(count[i]*2000) - 0.2 - *read_t0/1000000);
 						
 						//Left TPC
-						if(-200. < x_av[i] && x_av[i] < 0.){
+						if(-200. < x_av[i]/count[i] && x_av[i]/count[i] < 0.){
 							h_dQdx_L->Fill(t_av[i]/(count[i]*2000) - 0.2 - *read_t0/1000000, dQdx_av[i]/count[i]);
 						}
 
 						//Right TPC
-						if(0. < x_av[i] && x_av[i] < 200.){
+						if(0. < x_av[i]/count[i] && x_av[i]/count[i] < 200.){
 							h_dQdx_R->Fill(t_av[i]/(count[i]*2000) - 0.2 - *read_t0/1000000, dQdx_av[i]/count[i]);
 						}
 					}
@@ -338,7 +338,7 @@ int main(int argc, char**argv) {
 			h_dQdx->Draw("COLZ");
 			TPaveText *stats_dQdx = new TPaveText(.55,.80,.80,.88,"blNDC");
 			drawCosmicStats(stats_dQdx,"AC cosmics: %d",track_count);
-			c_dQdx->SaveAs((std::to_string(N) + "_dQdx_multiwire.png").c_str());
+			c_dQdx->SaveAs((mydata_cosmics + std::to_string(N) + "_dQdx_multiwire.png").c_str());
 
 			TCanvas *c_XvT = new TCanvas();		
 			g_XvT->SetMarkerColor(kViolet + 3);
@@ -350,7 +350,7 @@ int main(int argc, char**argv) {
 			g_XvT->Draw("AP");
 			TPaveText *stats_XvT = new TPaveText(.63,.80,.88,.88,"blNDC");
 			drawCosmicStats(stats_XvT,"AC cosmics: %d",track_count);		
-			c_XvT->SaveAs((std::to_string(N) + "_XvTMultiwire.png").c_str());
+			c_XvT->SaveAs((mydata_cosmics + std::to_string(N) + "_XvTMultiwire.png").c_str());
 
 			TCanvas *c_dQdx_vT = new TCanvas();
 			c_dQdx_vT->SetWindowSize(1500,500);
@@ -380,7 +380,7 @@ int main(int argc, char**argv) {
 			histLabels2D(h_dQdx_R, "ms", "ADC/cm", 3, 3);
 			TPaveText *stats_dQdx_R = new TPaveText(.55,.80,.80,.88,"blNDC");
 			drawCosmicStats(stats_dQdx_R,"AC cosmics: %d",track_count);
-			c_dQdx_vT->SaveAs((std::to_string(N) + "_dQdxVt_multiwire.png").c_str());
+			c_dQdx_vT->SaveAs((mydata_cosmics + std::to_string(N) + "_dQdxVt_multiwire.png").c_str());
 
 		}
 
@@ -398,7 +398,7 @@ int main(int argc, char**argv) {
 			c_MPV->cd();
 			MPVfancyDraw(MPVplot, 0); //0 for distance, 1 for time			
 			std::vector<double> results_x = fitExpoInX(MPVplot, track_count);
-			c_MPV->SaveAs((std::to_string(N) + "_MPV_multiwire.png").c_str());
+			c_MPV->SaveAs((mydata_cosmics + std::to_string(N) + "_MPV_multiwire.png").c_str());
 
 			//Histogram
 			TGraphErrors *MPVplot_L = new TGraphErrors(); 
@@ -434,7 +434,7 @@ int main(int argc, char**argv) {
 			TPaveText *pt_R = new TPaveText(.50,.75,.80,.88,"blNDC");
 			std::vector<double> results_TR = fitExpoInT(TPCFit, MPVplot_R, t_formula, pt_R, track_count, kGreen + 1);
 
-			c_tMPV->SaveAs((std::to_string(N) + "_MPVt_multiwire.png").c_str());
+			c_tMPV->SaveAs((mydata_cosmics + std::to_string(N) + "_MPVt_multiwire.png").c_str());
 
 			N_wires.push_back(N);
 			lifetime_x[0].push_back(results_x[0]);
@@ -484,7 +484,7 @@ int main(int argc, char**argv) {
 	mg->Add(g_lifeVwiresTR);
 	mg->Draw("AP");
 	C_mg->BuildLegend();
-	C_mg->SaveAs("INSERTFILENAMEHERE.png");
+	C_mg->SaveAs((mydata_cosmics + "LifetimeVwireNumPlot.png").c_str());
 
 	std::cout << "----------Lifetime Results-------------" << std::endl;
 	std::cout << "----------Drift Distance-------------" << std::endl;
