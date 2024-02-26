@@ -33,6 +33,7 @@
 #include "TString.h"
 #include "TPaveStats.h"
 #include "TLatex.h"
+#include "TMultiGraph.h"
 
 //Function definitions
 int bool_input(std::string bool_name, int arg1, char**arg2);
@@ -48,8 +49,8 @@ TH2D *hist_2D(std::string name, std::vector<double> x_data, std::vector<double> 
 void drawLifetimeStatBox(int track_count, double Lchisq, double Lndf, double Lpar1, double Lerr1, double Rchisq, double Rndf, double Rpar1, double Rerr1, TF1 *LeftTPCFit, TF1 *RightTPCFit);
 void drawCosmicStats(TPaveText *stats_h, std::string text, int track_count);
 TGraphErrors *findMPV(TGraphErrors *MPVplot, TH2D *h_dQdx, bool plotProjY, std::string mydata_cosmics, std::string dQdxProjYPlotName, bool x_var);
-void fitExpoInX(TGraphErrors *MPVplot, int track_count);
-void fitExpoInT(TF1 *TPCFit, TGraphErrors *MPVPlot_L, std::string t_formula, TPaveText *pt_L, int track_count, Color_t expoLineColor);
+std::vector<double> fitExpoInX(TGraphErrors *MPVplot, int track_count);
+std::vector<double> fitExpoInT(TF1 *TPCFit, TGraphErrors *MPVPlot_L, std::string t_formula, TPaveText *pt_L, int track_count, Color_t expoLineColor);
 void MPVfancyDraw(TGraphErrors *MPVplot, bool x_var, int whichTPC = 0);
 
 
@@ -101,6 +102,7 @@ int main(int argc, char**argv) {
 	std::string dQdxVtPlotName = "dQdxVt_hist_" + fileSaveID + ".png";
 	std::string dQdxVtProjYPlotName = "dQdxVtProjY_hist_" + fileSaveID;
 	std::string MPVtPlotName = "MPVt_" + fileSaveID + ".png";
+	std::string MultiwirePlotName = "multiMeth2_" + fileSaveID + ".png";
 
 	//define location to save plots to (including plot name(!))
 	std::string dQdxSaveLoc = mydata_cosmics + dQdxPlotName;
@@ -137,17 +139,18 @@ int main(int argc, char**argv) {
 	TTreeReaderArray<Float_t> read_x(treereader, "trk.hits2.h.sp.x");
 	TTreeReaderArray<Float_t> read_dqdx(treereader, "trk.hits2.dqdx");
 	TTreeReaderArray<Float_t> read_T(treereader, "trk.hits2.h.time");
-	TTreeReaderArray<Float_t> read_t0(treereader, "trk.t0");
-	TTreeReaderValue<float> read_xi(treereader, "trk.start.x");
-	TTreeReaderValue<float> read_xiTruth(treereader, "trk.truth.p.start.x");
-	TTreeReaderValue<float> read_yi(treereader, "trk.start.y");
-	TTreeReaderValue<float> read_zi(treereader, "trk.start.z");
-	TTreeReaderValue<float> read_xf(treereader, "trk.end.x");
-	TTreeReaderValue<float> read_xfTruth(treereader, "trk.truth.p.end.x");
-	TTreeReaderValue<float> read_yf(treereader, "trk.end.y");
-	TTreeReaderValue<float> read_zf(treereader, "trk.end.z");
-	TTreeReaderValue<float> read_E(treereader, "trk.truth.p.startE");
+	TTreeReaderValue<Float_t> read_t0(treereader, "trk.t0");
+	TTreeReaderArray<Float_t> read_xi(treereader, "trk.start.x");
+	TTreeReaderArray<Float_t> read_xiTruth(treereader, "trk.truth.p.start.x");
+	TTreeReaderArray<Float_t> read_yi(treereader, "trk.start.y");
+	TTreeReaderArray<Float_t> read_zi(treereader, "trk.start.z");
+	TTreeReaderArray<Float_t> read_xf(treereader, "trk.end.x");
+	TTreeReaderArray<Float_t> read_xfTruth(treereader, "trk.truth.p.end.x");
+	TTreeReaderArray<Float_t> read_yf(treereader, "trk.end.y");
+	TTreeReaderArray<Float_t> read_zf(treereader, "trk.end.z");
+	TTreeReaderArray<Float_t> read_E(treereader, "trk.truth.p.startE");
 	TTreeReaderValue<int> read_selected(treereader, "trk.selected");
+	TTreeReaderArray<uint16_t> read_wire(treereader, "trk.hits2.h.wire");
 
 	//Not AC filtered (yet?). A comparison of initial and final x in reco and truth.
 	if(truth_test){ 
@@ -163,17 +166,17 @@ int main(int argc, char**argv) {
 		//read info into variables
 		treereader.Restart();
 		while(treereader.Next()){
-			//int entries = read_xi.GetSize();
-			//if(read_xi.GetSize() == 0){entries = 1;}
+			int entries = read_xi.GetSize();
+			if(read_xi.GetSize() == 0){entries = 1;}
 
-			//for (int i = 0; i < entries; i++){	
+			for (int i = 0; i < entries; i++){	
 				weights.push_back(1.);
-				xi.push_back(*read_xi);
-				xf.push_back(*read_xf);
-				xiTruth.push_back(*read_xiTruth);
-				xfTruth.push_back(*read_xfTruth);
-				xiDif.push_back(*read_xiTruth - *read_xi);
-				//}
+				xi.push_back(read_xi[i]);
+				xf.push_back(read_xf[i]);
+				xiTruth.push_back(read_xiTruth[i]);
+				xfTruth.push_back(read_xfTruth[i]);
+				xiDif.push_back(read_xiTruth[i] - read_xi[i]);
+				}
         }
 		
 		//function to set nice colour gradient
@@ -215,116 +218,194 @@ int main(int argc, char**argv) {
 		histLabels2D(h8, "cm", "cm", 3, 3);
 		c8->SaveAs(xiDifSaveLoc.c_str());
 	}
+
+	//Lifetime for each value of N
+	std::vector<std::vector<double>> lifetime_x {{},{}};
+	std::vector<std::vector<double>> error_lifetime_x {{},{}};
+	std::vector<std::vector<double>> lifetime_T {{},{}};
+	std::vector<std::vector<double>> error_lifetime_T {{},{}};
+	std::vector<int> N_wires;
+	TGraphErrors *g_lifeVwiresXL = new TGraphErrors;
+	TGraphErrors *g_lifeVwiresXR = new TGraphErrors;
+	TGraphErrors *g_lifeVwiresTL = new TGraphErrors;
+	TGraphErrors *g_lifeVwiresTR = new TGraphErrors;
 	
-	//Histograms
-	TH2D *h_dQdx = new TH2D("h_dQdx","dQ/dx vs x", 100, -200, 200, 75, 200, 1800);
-	TGraph *g_XvT = new TGraph;
-	TH2D *h_dQdx_L = new TH2D("h_dQdx_L","dQ/dx vs t Left TPC", 100, 0, 1.3, 75, 200, 1800);
-	TH2D *h_dQdx_R = new TH2D("h_dQdx_R","dQ/dx vs t Right TPC", 100, 0, 1.3, 75, 200, 1800);
-			
-	int track_count = 0;
-	int overall_count = 0;
+	for(int j=1; j<=20; j++){
+		//Histograms
+		TH2D *h_dQdx = new TH2D("h_dQdx","dQ/dx vs x", 100, -200, 200, 75, 200, 1800);
+		TGraph *g_XvT = new TGraph;
+		TH2D *h_dQdx_L = new TH2D("h_dQdx_L","dQ/dx vs t Left TPC", 100, 0, 1.3, 75, 200, 1800);
+		TH2D *h_dQdx_R = new TH2D("h_dQdx_R","dQ/dx vs t Right TPC", 100, 0, 1.3, 75, 200, 1800);
+				
+		int track_count = 0;
+		int overall_count = 0;
+		int N = j; //no. of wires to group together
 
-	treereader.Restart();
-	while(treereader.Next()){
-		int entries = read_dqdx.GetSize();
+		//vector for grouping wires together
+		std::vector<double> dQdx;
+		std::vector<double> x;
+		std::vector<double> t;
 
-		//if(read_xi[0] < -200. || read_xi[0] > 200. || read_xf[0] < -200. || read_xf[0] > 200.){
-		//if(true){
-		if(*read_selected == 1){
-			//std::cout << "Doing if loop" << std::endl;
-			for (int i = 0; i < entries; i++){
+		treereader.Restart();
+		while(treereader.Next()){
+			int entries = read_dqdx.GetSize();
 
-				if(std::isnan(read_x[i]) == 0){ //get rid of nan entries
-					h_dQdx->Fill(read_x[i], read_dqdx[i]);
-					g_XvT->SetPoint(g_XvT->GetN(), read_x[i], read_T[i]/2000 - 0.2 - read_t0[0]/1000000);
+			//if(read_xi[0] < -200. || read_xi[0] > 200. || read_xf[0] < -200. || read_xf[0] > 200.){
+			//if(true){
+			if(*read_selected == 1){
 
-					//Left TPC
-					if(-200. < read_x[i] && read_x[i] < 0.){
-						h_dQdx_L->Fill(read_T[i]/2000 - 0.2 - read_t0[0]/1000000, read_dqdx[i]);
-					}
-
-					//Right TPC
-					if(0. < read_x[i] && read_x[i] < 200.){
-						h_dQdx_R->Fill(read_T[i]/2000 - 0.2 - read_t0[0]/1000000, read_dqdx[i]);
+				//Remove all nan entries
+				for (int i = 0; i < entries; i++){
+					if(std::isnan(read_x[i]) == 0){ //get rid of nan entries
+						dQdx.push_back(read_dqdx[i]);
+						x.push_back(read_x[i]);
+						t.push_back(read_T[i]);
 					}
 				}
 
+				//now have dQdx, x, t and wire for all elements that didn't have x as nan. 
+
+				int count = 0;
+				int i = 0;
+				double dQdx_av = 0.;
+				double x_av = 0.;
+				double t_av = 0.;
+
+				//std::cout << "dQdx size -------------- " << dQdx.size() << std::endl;
+				for (int j = 0; j < dQdx.size(); j++){
+					//std::cout << x[j] << std::endl;
+				}
+
+				while(i < dQdx.size()){
+					
+					//std::cout << "---------------------Loop----------------------" << std::endl;
+					
+					while((i+1) % N != 0 && i < dQdx.size()){
+						
+						dQdx_av += dQdx[i];
+						x_av += x[i];
+						t_av += t[i];
+						count ++;
+
+						//std::cout << "dQdx: " << dQdx[i] << " | x: " << x[i] << " | t: " << t[i] << " | count: " << count << " | i: " << i << std::endl;
+						i++;
+					}
+					
+					if((i+1) % N == 0){
+						dQdx_av += dQdx[i];
+						x_av += x[i];
+						t_av += t[i];
+						count ++;
+						//std::cout << "dQdx: " << dQdx[i] << " | x: " << x[i] << " | t: " << t[i] << " | count: " << count << " | i: " << i << std::endl;
+						i++;
+					}
+
+					//std::cout << "--------------Filling---------------------" << std::endl;
+					//std::cout << "dQdx Fill: " << dQdx_av/count << " | x Fill: " << x_av/count << " | t Fill: " << t_av/(count*2000) - 0.2 - *read_t0/1000000 << std::endl;
+					h_dQdx->Fill(x_av/count, dQdx_av/count);
+					g_XvT->SetPoint(g_XvT->GetN(), x_av/count, t_av/(count*2000) - 0.2 - *read_t0/1000000);
+					
+					//Left TPC
+					if(-200. < x_av/count && x_av/count < 0.){
+						//std::cout << "Left" << std::endl;
+						h_dQdx_L->Fill(t_av/(count*2000) - 0.2 - *read_t0/1000000, dQdx_av/count);
+					}
+
+					//Right TPC
+					if(0. < x_av/count && x_av/count < 200.){
+						//std::cout << "Right" << std::endl;
+						h_dQdx_R->Fill(t_av/(count*2000) - 0.2 - *read_t0/1000000, dQdx_av/count);
+					}
+
+					dQdx_av = 0;
+					x_av = 0;
+					t_av = 0;
+					count = 0;
+	
+					//std::cout << "i : " << i << std::endl;
+				}
+
+				//clear all vectors ready for next loop
+		
+				x.clear();
+				dQdx.clear();
+				t.clear();
+
+				track_count += 1;
+
+				//std::cout << "Next" << std::endl;
+
+
 			}
 			
-			track_count += 1;
-
-
+			overall_count += 1;
 		}
 		
-		overall_count += 1;
-	}
-	
-	std::cout << "AC track count is " << track_count << std::endl;
-	std::cout << "Overall track count is " << overall_count << std::endl;
+		std::cout << "AC track count is " << track_count << std::endl;
+		std::cout << "Overall track count is " << overall_count << std::endl;
 
-	if(plot_dQdx){
+		if(plot_dQdx){
 
-		std::cout << "----Plotting dQ/dx-----------------------------------------------------" << std::endl;
+			std::cout << "----Plotting dQ/dx-----------------------------------------------------" << std::endl;
 
-		//testing new data filling method
-		TCanvas *c_dQdx = new TCanvas();
-		h_dQdx->SetStats(0);
-		h_dQdx->GetXaxis()->SetTitle("x [cm]");
-		h_dQdx->GetYaxis()->SetTitle("dQ/dx [ADc/cm]");
-		histLabels2D(h_dQdx, "cm", "ADC/cm", 3, 3);
-		c_dQdx->SetRightMargin(0.18);
-		c_dQdx->cd();
-		h_dQdx->Draw("COLZ");
-		TPaveText *stats_dQdx = new TPaveText(.55,.80,.80,.88,"blNDC");
-		drawCosmicStats(stats_dQdx,"AC cosmics: %d",track_count);
-		c_dQdx->SaveAs(dQdxSaveLoc.c_str());
+			//testing new data filling method
+			TCanvas *c_dQdx = new TCanvas();
+			h_dQdx->SetStats(0);
+			h_dQdx->GetXaxis()->SetTitle("x [cm]");
+			h_dQdx->GetYaxis()->SetTitle("dQ/dx [ADc/cm]");
+			histLabels2D(h_dQdx, "cm", "ADC/cm", 3, 3);
+			c_dQdx->SetRightMargin(0.18);
+			c_dQdx->cd();
+			h_dQdx->Draw("COLZ");
+			TPaveText *stats_dQdx = new TPaveText(.55,.80,.80,.88,"blNDC");
+			drawCosmicStats(stats_dQdx,"AC cosmics: %d",track_count);
+			c_dQdx->SaveAs((mydata_cosmics + std::to_string(N) + "_dQdx_" + MultiwirePlotName).c_str());
 
-		TCanvas *c_XvT = new TCanvas();		
-		g_XvT->SetMarkerColor(kViolet + 3);
-		g_XvT->SetMarkerStyle(kPlus);
-		g_XvT->SetMarkerSize(0.1);
-		g_XvT->GetXaxis()->SetTitle("x (cm)");
-		g_XvT->GetYaxis()->SetTitle("t (ms)");
-		g_XvT->SetTitle("drift time vs drift distance");
-		g_XvT->Draw("AP");
-		TPaveText *stats_XvT = new TPaveText(.63,.80,.88,.88,"blNDC");
-		drawCosmicStats(stats_XvT,"AC cosmics: %d",track_count);		
-		c_XvT->SaveAs(XvTSaveLoc.c_str());
+			TCanvas *c_XvT = new TCanvas();		
+			g_XvT->SetMarkerColor(kViolet + 3);
+			g_XvT->SetMarkerStyle(kPlus);
+			g_XvT->SetMarkerSize(0.1);
+			g_XvT->GetXaxis()->SetTitle("x (cm)");
+			g_XvT->GetYaxis()->SetTitle("t (ms)");
+			g_XvT->SetTitle("drift time vs drift distance");
+			g_XvT->Draw("AP");
+			TPaveText *stats_XvT = new TPaveText(.63,.80,.88,.88,"blNDC");
+			drawCosmicStats(stats_XvT,"AC cosmics: %d",track_count);		
+			c_XvT->SaveAs((mydata_cosmics + std::to_string(N) + "_XvT_" + MultiwirePlotName).c_str());
 
-		TCanvas *c_dQdx_vT = new TCanvas();
-		c_dQdx_vT->SetWindowSize(1500,500);
-		TPad *pad1 = new TPad("pad1", "", 0, 0, 0.5, 1.0);
-		TPad *pad2 = new TPad("pad2", "", 0.5, 0, 1.0, 1.0);
-		c_dQdx_vT->cd();
-		pad1->SetRightMargin(0.18);
-		pad1->SetLeftMargin(0.15);
-  		pad1->Draw();
-  		pad1->cd();
-		h_dQdx_L->SetStats(0);
-		h_dQdx_L->GetXaxis()->SetTitle("t [ms]");
-		h_dQdx_L->GetYaxis()->SetTitle("dQ/dx [ADc/cm]");
-		h_dQdx_L->Draw("COLZ");
-		histLabels2D(h_dQdx_L, "ms", "ADC/cm", 3, 3);
-		TPaveText *stats_dQdx_L = new TPaveText(.55,.80,.80,.88,"blNDC");
-		drawCosmicStats(stats_dQdx_L,"AC cosmics: %d",track_count);
-		c_dQdx_vT->cd();
-		pad2->SetRightMargin(0.18);
-		pad2->SetLeftMargin(0.15);
-  		pad2->Draw();
-  		pad2->cd();
-		h_dQdx_R->SetStats(0);
-		h_dQdx_R->GetXaxis()->SetTitle("t [ms]");
-		h_dQdx_R->GetYaxis()->SetTitle("dQ/dx [ADc/cm]");
-		h_dQdx_R->Draw("COLZ");
-		histLabels2D(h_dQdx_R, "ms", "ADC/cm", 3, 3);
-		TPaveText *stats_dQdx_R = new TPaveText(.55,.80,.80,.88,"blNDC");
-		drawCosmicStats(stats_dQdx_R,"AC cosmics: %d",track_count);
-		c_dQdx_vT->SaveAs(dQdxVtSaveLoc.c_str());
+			TCanvas *c_dQdx_vT = new TCanvas();
+			c_dQdx_vT->SetWindowSize(1500,500);
+			TPad *pad1 = new TPad("pad1", "", 0, 0, 0.5, 1.0);
+			TPad *pad2 = new TPad("pad2", "", 0.5, 0, 1.0, 1.0);
+			c_dQdx_vT->cd();
+			pad1->SetRightMargin(0.18);
+			pad1->SetLeftMargin(0.15);
+			pad1->Draw();
+			pad1->cd();
+			h_dQdx_L->SetStats(0);
+			h_dQdx_L->GetXaxis()->SetTitle("t [ms]");
+			h_dQdx_L->GetYaxis()->SetTitle("dQ/dx [ADc/cm]");
+			h_dQdx_L->Draw("COLZ");
+			histLabels2D(h_dQdx_L, "ms", "ADC/cm", 3, 3);
+			TPaveText *stats_dQdx_L = new TPaveText(.55,.80,.80,.88,"blNDC");
+			drawCosmicStats(stats_dQdx_L,"AC cosmics: %d",track_count);
+			c_dQdx_vT->cd();
+			pad2->SetRightMargin(0.18);
+			pad2->SetLeftMargin(0.15);
+			pad2->Draw();
+			pad2->cd();
+			h_dQdx_R->SetStats(0);
+			h_dQdx_R->GetXaxis()->SetTitle("t [ms]");
+			h_dQdx_R->GetYaxis()->SetTitle("dQ/dx [ADc/cm]");
+			h_dQdx_R->Draw("COLZ");
+			histLabels2D(h_dQdx_R, "ms", "ADC/cm", 3, 3);
+			TPaveText *stats_dQdx_R = new TPaveText(.55,.80,.80,.88,"blNDC");
+			drawCosmicStats(stats_dQdx_R,"AC cosmics: %d",track_count);
+			c_dQdx_vT->SaveAs((mydata_cosmics + std::to_string(N) + "_dQdxVt_" + MultiwirePlotName).c_str());
 
-	}
+		}
 
-		
+			
 		if(plot_MPV){
 
 			std::cout << "----Finding MPV--------------------------------------------------------" << std::endl;
@@ -337,8 +418,8 @@ int main(int argc, char**argv) {
 			TCanvas *c_MPV = new TCanvas();
 			c_MPV->cd();
 			MPVfancyDraw(MPVplot, 0); //0 for distance, 1 for time			
-			fitExpoInX(MPVplot, track_count);
-			c_MPV->SaveAs(MPVSaveLoc.c_str());
+			std::vector<double> results_x = fitExpoInX(MPVplot, track_count);
+			c_MPV->SaveAs((mydata_cosmics + std::to_string(N) + "_MPV_" + MultiwirePlotName).c_str());
 
 			//Histogram
 			TGraphErrors *MPVplot_L = new TGraphErrors(); 
@@ -362,7 +443,7 @@ int main(int argc, char**argv) {
 			std::string t_formula = "[0]*exp(-(x/[1]))";
 			TF1 *TPCFit = new TF1("TPCFit", t_formula.c_str(), 0.2, 1.0);
 			TPaveText *pt_L = new TPaveText(.50,.75,.80,.88,"blNDC");
-			fitExpoInT(TPCFit, MPVplot_L, t_formula, pt_L, track_count, kRed);
+			std::vector<double> results_TL = fitExpoInT(TPCFit, MPVplot_L, t_formula, pt_L, track_count, kRed);
 
 
 			c_tMPV->cd();
@@ -372,11 +453,76 @@ int main(int argc, char**argv) {
 			pad2_tMPV->cd();
 			MPVfancyDraw(MPVplot_R, 1, 1);
 			TPaveText *pt_R = new TPaveText(.50,.75,.80,.88,"blNDC");
-			fitExpoInT(TPCFit, MPVplot_R, t_formula, pt_R, track_count, kGreen + 1);
+			std::vector<double> results_TR = fitExpoInT(TPCFit, MPVplot_R, t_formula, pt_R, track_count, kGreen + 1);
 
-			c_tMPV->SaveAs(MPVtSaveLoc.c_str());
+			c_tMPV->SaveAs((mydata_cosmics + std::to_string(N) + "_MPVt_" + MultiwirePlotName).c_str());
+
+			N_wires.push_back(N);
+			lifetime_x[0].push_back(results_x[0]);
+			error_lifetime_x[0].push_back(results_x[1]);
+			lifetime_x[1].push_back(results_x[2]);
+			error_lifetime_x[1].push_back(results_x[3]);
+
+			lifetime_T[0].push_back(results_TL[0]);
+			error_lifetime_T[0].push_back(results_TL[1]);
+			lifetime_T[1].push_back(results_TR[0]);
+			error_lifetime_T[1].push_back(results_TR[1]);
+
+			g_lifeVwiresXL->SetPoint(g_lifeVwiresXL->GetN(), N, results_x[0]);
+			g_lifeVwiresXL->SetPointError(g_lifeVwiresXL->GetN()-1, 0., results_x[1]);
+			g_lifeVwiresXR->SetPoint(g_lifeVwiresXR->GetN(), N, results_x[2]);
+			g_lifeVwiresXR->SetPointError(g_lifeVwiresXR->GetN()-1, 0., results_x[3]);
+
+			g_lifeVwiresTL->SetPoint(g_lifeVwiresTL->GetN(), N, results_TL[0]);
+			g_lifeVwiresTL->SetPointError(g_lifeVwiresTL->GetN()-1, 0., results_TL[1]);
+			g_lifeVwiresTR->SetPoint(g_lifeVwiresTR->GetN(), N, results_TR[0]);
+			g_lifeVwiresTR->SetPointError(g_lifeVwiresTR->GetN()-1, 0., results_TR[1]);
+
 
 		}
+
+	}
+
+	TCanvas *C_mg = new TCanvas();
+	C_mg->cd();
+	TMultiGraph *mg = new TMultiGraph();
+	g_lifeVwiresXL->SetMarkerColor(kRed);
+	g_lifeVwiresTL->SetMarkerColor(kRed);
+	g_lifeVwiresXR->SetMarkerColor(kGreen+1);
+	g_lifeVwiresTR->SetMarkerColor(kGreen+1);
+	g_lifeVwiresXL->SetMarkerStyle(21);
+	g_lifeVwiresXR->SetMarkerStyle(21);
+	g_lifeVwiresTL->SetMarkerStyle(47);
+	g_lifeVwiresTR->SetMarkerStyle(47);
+	g_lifeVwiresXL->SetTitle("x, left TPC");
+	g_lifeVwiresXR->SetTitle("x, right TPC");
+	g_lifeVwiresTL->SetTitle("t, left TPC");
+	g_lifeVwiresTR->SetTitle("t, right TPC");
+	mg->SetTitle("Lifetime vs number of combined wires;N; #tau (ms)");
+	mg->Add(g_lifeVwiresXL);
+	mg->Add(g_lifeVwiresXR);
+	mg->Add(g_lifeVwiresTL);
+	mg->Add(g_lifeVwiresTR);
+	mg->Draw("AP");
+	C_mg->BuildLegend(0.4,0.7,0.6,0.88);
+	C_mg->SaveAs((mydata_cosmics + "LifetimeVwireNum_" + MultiwirePlotName).c_str());
+
+	std::cout << "----------Lifetime Results-------------" << std::endl;
+	std::cout << "----------Drift Distance-------------" << std::endl;
+	std::cout << " N wires | Lifetime L | Error L | Lifetime R | Error R " << std::endl;
+
+	for (int i = 0; i < 20; i++){
+		
+		std::cout << N_wires[i] << " | " << lifetime_x[0][i] << " | " << error_lifetime_x[0][i] << " | " << lifetime_x[1][i] << " | " << error_lifetime_x[1][i] << std::endl;
+	}
+
+	std::cout << "----------Drift Time-----------------" << std::endl;
+	std::cout << " Lifetime L | Error L | Lifetime R | Error R " << std::endl;
+
+	for (int i = 0; i < 20; i++){
+		
+		std::cout << N_wires[i] << " | " << lifetime_T[0][i] << " | " << error_lifetime_T[0][i] << " | " << lifetime_T[1][i] << " | " << error_lifetime_T[1][i] << std::endl;
+	}
 	
 	
     if(plot_angDist){
@@ -393,22 +539,20 @@ int main(int argc, char**argv) {
 		//fill variables from ROOT data files
 		treereader.Restart();
 		while(treereader.Next()){
-			//int entries = read_xi.GetSize();
-			//if(read_xi.GetSize() == 0){entries = 1;} //read_XX are arrays, but each track only has one start and end point
+			int entries = read_xi.GetSize();
+			if(read_xi.GetSize() == 0){entries = 1;} //read_XX are arrays, but each track only has one start and end point
 
-			//for (int i = 0; i < entries; i++){
-				//if(read_xi[i] < -199. || read_xi[i] > 199. || read_xf[i] < -199. || read_xf[i] > 199.){ //AC crosser filter
-				if(*read_selected == 1){
+			for (int i = 0; i < entries; i++){
+				if(read_xi[i] < -199. || read_xi[i] > 199. || read_xf[i] < -199. || read_xf[i] > 199.){ //AC crosser filter
 					weights.push_back(1.);
-					xi.push_back(*read_xi);
-					yi.push_back(*read_yi);
-					zi.push_back(*read_zi);
-					xf.push_back(*read_xf);
-					yf.push_back(*read_yf);
-					zf.push_back(*read_zf);
+					xi.push_back(read_xi[i]);
+					yi.push_back(read_yi[i]);
+					zi.push_back(read_zi[i]);
+					xf.push_back(read_xf[i]);
+					yf.push_back(read_yf[i]);
+					zf.push_back(read_zf[i]);
 				}
-				//}
-				//}
+				}
         }	
 
 		std::cout << "AC track count 2: " << xi.size() << std::endl;
@@ -495,18 +639,14 @@ int main(int argc, char**argv) {
 		//read in data from ROOT files
 		treereader.Restart();
 		while(treereader.Next()){	
-			//int entries = read_E.GetSize();
-			//if(read_E.GetSize() == 0){entries = 1;}//read_XX are arrays, but each track only has one energy value
-			//for (int i = 0; i < entries; i++){
-				//if(read_xi[i] < -199. || read_xi[i] > 199. || read_xf[i] < -199. || read_xf[i] > 199.){//AC crosser filter
-				if(*read_selected == 1){
-					E.push_back(*read_E);   
-					weights.push_back(1.);
-
-				}
-
-				//}				                 
-			//}
+			int entries = read_E.GetSize();
+			if(read_E.GetSize() == 0){entries = 1;}//read_XX are arrays, but each track only has one energy value
+			for (int i = 0; i < entries; i++){
+				if(read_xi[i] < -199. || read_xi[i] > 199. || read_xf[i] < -199. || read_xf[i] > 199.){//AC crosser filter
+					E.push_back(read_E[i]);   
+					weights.push_back(1.); 
+				}				                 
+			}
 		}
 
 		//Plot energy histogram
@@ -868,22 +1008,12 @@ TGraphErrors *findMPV(TGraphErrors *MPVplot, TH2D *h_dQdx, bool plotProjY, std::
 			std::cout << "----Plotting projY-----------------------------------------------------" << std::endl;
 			std::string plotNameTemp;
 			if(x_var == 0){
-				std::stringstream s1;
-				s1 << std::setprecision(4) << h_dQdx->GetXaxis()->GetBinLowEdge(i);
-				std::string str1 = s1.str();
-				std::stringstream s2;
-				s2 << std::setprecision(4) << (h_dQdx->GetXaxis()->GetBinLowEdge(i) + h_dQdx->GetXaxis()->GetBinWidth(i));
-				std::string str2 = s2.str();
-				plotNameTemp = "dQ/dx for " + str1 + " cm < x < " + str2 + " cm";
+				plotNameTemp = "dQ/dx for " + std::to_string(h_dQdx->GetXaxis()->GetBinLowEdge(i))
+				+ " cm < x < " + std::to_string(h_dQdx->GetXaxis()->GetBinLowEdge(i) + h_dQdx->GetXaxis()->GetBinWidth(i)) + " cm";
 			}
 			else if(x_var == 1){
-				std::stringstream s1;
-				s1 << std::setprecision(4) << h_dQdx->GetXaxis()->GetBinLowEdge(i);
-				std::string str1 = s1.str();
-				std::stringstream s2;
-				s2 << std::setprecision(4) << (h_dQdx->GetXaxis()->GetBinLowEdge(i) + h_dQdx->GetXaxis()->GetBinWidth(i));
-				std::string str2 = s2.str();
-				plotNameTemp = "dQ/dx for " + str1 + " ms < t < " + str2 + " ms";
+				plotNameTemp = "dQ/dx for " + std::to_string(h_dQdx->GetXaxis()->GetBinLowEdge(i))
+				+ " ms < t < " + std::to_string(h_dQdx->GetXaxis()->GetBinLowEdge(i) + h_dQdx->GetXaxis()->GetBinWidth(i)) + " ms";
 			}
 			proj_y->SetTitle(plotNameTemp.c_str()); 
 			proj_y->Draw();
@@ -903,7 +1033,7 @@ TGraphErrors *findMPV(TGraphErrors *MPVplot, TH2D *h_dQdx, bool plotProjY, std::
 
 }
 
-void fitExpoInX(TGraphErrors *MPVplot, int track_count){
+std::vector<double> fitExpoInX(TGraphErrors *MPVplot, int track_count){
 	//Fit exponential in both TPCs
 	//double vDrift = 159.; //in cm/ms,from ProtoDUNE calibration paper
 	double vDrift = 156.267; //from Lan's code - where is this from?
@@ -957,9 +1087,13 @@ void fitExpoInX(TGraphErrors *MPVplot, int track_count){
 
 	std::cout << "Lifetime Left TPC : " << Lpar1<< " \u00b1 " << Lerr1 << std::endl;
 	std::cout << "Lifetime Right TPC : " << Rpar1 <<  " \u00b1 " << Rerr1 << std::endl;
+
+	std::vector<double> results_x = {Lpar1, Lerr1, Rpar1, Rerr1};
+
+	return results_x;
 }
 
-void fitExpoInT(TF1 *TPCFit, TGraphErrors *MPVplot_L, std::string t_formula, TPaveText *pt_L, int track_count, Color_t expoLineColor){
+std::vector<double> fitExpoInT(TF1 *TPCFit, TGraphErrors *MPVplot_L, std::string t_formula, TPaveText *pt_L, int track_count, Color_t expoLineColor){
 
 	gROOT->GetFunction("expo");
 	TPCFit->SetParNames("Norm","Lifetime");
@@ -997,6 +1131,10 @@ void fitExpoInT(TF1 *TPCFit, TGraphErrors *MPVplot_L, std::string t_formula, TPa
 	<< " ; err0 = " << TPCFit->GetParError(0) << " ; err1 = " << TPCFit->GetParError(1) << std::endl;
 
 	std::cout << "Lifetime Left TPC : " << TPCFit->GetParameter(1) << " \u00b1 " << TPCFit->GetParError(1) << std::endl;
+
+	std::vector<double> results_T = {TPCFit->GetParameter(1), TPCFit->GetParError(1)};
+
+	return results_T;
 
 }
 
