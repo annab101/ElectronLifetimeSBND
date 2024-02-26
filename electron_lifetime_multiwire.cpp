@@ -350,7 +350,7 @@ int main(int argc, char**argv) {
 			g_XvT->Draw("AP");
 			TPaveText *stats_XvT = new TPaveText(.63,.80,.88,.88,"blNDC");
 			drawCosmicStats(stats_XvT,"AC cosmics: %d",track_count);		
-			c_XvT->SaveAs((mydata_cosmics + std::to_string(N) + "_XvTMultiwire.png").c_str());
+			c_XvT->SaveAs((mydata_cosmics + std::to_string(N) + "_XvTmultiwire.png").c_str());
 
 			TCanvas *c_dQdx_vT = new TCanvas();
 			c_dQdx_vT->SetWindowSize(1500,500);
@@ -483,8 +483,8 @@ int main(int argc, char**argv) {
 	mg->Add(g_lifeVwiresTL);
 	mg->Add(g_lifeVwiresTR);
 	mg->Draw("AP");
-	C_mg->BuildLegend();
-	C_mg->SaveAs((mydata_cosmics + "LifetimeVwireNumPlot.png").c_str());
+	C_mg->BuildLegend(0.4,0.7,0.6,0.88);
+	C_mg->SaveAs((mydata_cosmics + "LifetimeVwireNum2022AfullSelected.png").c_str());
 
 	std::cout << "----------Lifetime Results-------------" << std::endl;
 	std::cout << "----------Drift Distance-------------" << std::endl;
