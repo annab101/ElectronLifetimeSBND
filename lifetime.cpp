@@ -82,13 +82,36 @@ class fitExpoParameters {
 		
 };
 
+class fitExpoConstParameters {
+	
+	public: 
+		
+
+		double fp[3] = {0.}; //fit parameters
+		double efp[3] = {0.}; //fit parameter errors
+		double cov[3] = {0.}; //covariance matrix
+		double lb = -1.; //fit lower bound
+		double ub = -1.;
+
+		void reset() {
+			std::fill(std::begin(fp), std::end(fp), 0.);
+			std::fill(std::begin(efp), std::end(efp), 0.);
+			std::fill(std::begin(cov), std::end(cov), 0.);
+			lb = -1.;
+			ub = -1.;
+		}
+		
+};
+
 //Function definitions
 int bool_input(std::string bool_name, int arg1, char**arg2);
 double_t langaufun(Double_t *x, Double_t *par);
 double_t expofunX(Double_t *x, Double_t *par);
 double_t expofunT(Double_t *x, Double_t *par);
+double_t expofunConst(Double_t *x, Double_t *par);
 void SetLGParameters(TH1D *h, Double_t *fp, Double_t *efp, Double_t &lb, Double_t &ub);
 void SetExpoParameters(Double_t *fp);
+void SetExpoConstParameters(Double_t *fp);
 TF1 *fitter(TH1D *h, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *fiterrors, Double_t *covmat, std::string funcName);
 TF1 *fitter(TGraphErrors *g, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *fiterrors, Double_t *covmat, std::string funcName);
 double pointError(TH1D *proj_y, fitLGParameters fitParams);
@@ -115,6 +138,7 @@ int main(int argc, char**argv) {
 	std::string fileSaveID = "noID";
 	std::string fileSaveLoc = "noLoc";
 	int codeConfig = 0;
+	bool plotProjY = false;
 
 	for(int i=0; i<argc; ++i){
 		if(!strcmp(argv[i], "--filename")){
@@ -233,6 +257,8 @@ int main(int argc, char**argv) {
 	fitExpoParameters expoParams_tDriftL;
 	fitExpoParameters expoParams_tDriftR;
 
+	fitExpoConstParameters expoConstParams;
+
 	TGraphErrors** MPVplot_xDrift = new TGraphErrors*[maxWireGroup];
 	TGraphErrors** MPVplot_tDriftL = new TGraphErrors*[maxWireGroup];
 	TGraphErrors** MPVplot_tDriftR = new TGraphErrors*[maxWireGroup];
@@ -252,28 +278,40 @@ int main(int argc, char**argv) {
 	TF1 *expoFit_tDriftL = new TF1();
 	TF1 *expoFit_tDriftR = new TF1();
 
+	TF1 *expoConstFit = new TF1();
+
 	TCanvas *c_plain = new TCanvas();
 	c_plain->SetLeftMargin(0.15);
 	c_plain->SetRightMargin(0.18);
 	c_plain->SetBottomMargin(0.12);
 
 	TCanvas *c_split = new TCanvas();
-	c_split->SetWindowSize(1500,500);
+	c_split->SetWindowSize(2000,500);
 	TPad *pad1 = new TPad("pad1", "", 0, 0, 0.5, 1.0);
 	TPad *pad2 = new TPad("pad2", "", 0.5, 0, 1.0, 1.0);
 	c_split->cd();
-	pad1->SetRightMargin(0.18);
-	pad1->SetLeftMargin(0.15);
-	//pad1->Draw();
-	pad2->SetRightMargin(0.18);
-	pad2->SetLeftMargin(0.15);
-	//pad2->Draw();
+	pad1->SetRightMargin(0.20);
+	pad1->SetLeftMargin(0.18);
+	pad2->SetRightMargin(0.20);
+	pad2->SetLeftMargin(0.18);
+
+
+	TCanvas *c_split2 = new TCanvas();
+	c_split2->SetWindowSize(2000,500);
+	TPad *pad12 = new TPad("pad12", "", 0, 0, 0.5, 1.0);
+	TPad *pad22 = new TPad("pad22", "", 0.5, 0, 1.0, 1.0);
+	c_split2->cd();
+	pad12->SetRightMargin(0.1);
+	pad12->SetLeftMargin(0.18);
+	pad22->SetRightMargin(0.1);
+	pad22->SetLeftMargin(0.18);
 
 	//Sheffield colour scheme
 	Int_t deepViolet = TColor::GetColor("#440099");
 	Int_t coral = TColor::GetColor("#E7004C");
 	Int_t powderBlue = TColor::GetColor("#9ADBE8");
 	Int_t flamingo = TColor::GetColor("#FF6371");
+	Int_t mintGreen = TColor::GetColor("#00CE7C");
 
 
 	treereader.Restart();
@@ -333,7 +371,7 @@ int main(int argc, char**argv) {
 				t_sum += read_T[i];
 				count += 1;
 
-				if( i < end_index && (read_x[i] * read_x[i+1]) < 0.){ //changed for TPC flip experiment
+				if( i < end_index && (read_x[i] * read_x[i+1]) < 0.){
 
 					for (int N = 1; N <= maxWireGroup; N++){
 					
@@ -410,6 +448,91 @@ int main(int argc, char**argv) {
 			
 			}
 		}
+		if(codeConfig == 2){
+			for(int i = start_index; i <= end_index; i++){
+
+				dQdx_sum += read_dqdx[i];
+				x_sum += read_x[i];
+				t_sum += read_T[i];
+				count += 1;
+
+				if( i < end_index && (read_x[i] * read_x[i+1]) < 0.){
+
+					for (int N = 1; N <= maxWireGroup; N++){
+					
+						int j = N-1;
+
+						h_dQdx_xDrift[j]->Fill(x_sum[j]/count[j], dQdx_sum[j]/count[j]);
+										
+						if(-200. < x_sum[j]/count[j] && x_sum[j]/count[j] < 0.){
+							h_dQdx_tDriftL[j]->Fill(t_sum[j]/(count[j]*2000) - 0.2 - *read_t0/1000000, dQdx_sum[j]/count[j]);
+						}
+
+						if(0. < x_sum[j]/count[j] && x_sum[j]/count[j] < 200.){
+							h_dQdx_tDriftR[j]->Fill(t_sum[j]/(count[j]*2000) - 0.2 - *read_t0/1000000, dQdx_sum[j]/count[j]);
+						}
+					}				
+
+					dQdx_sum *= 0.;
+					x_sum *= 0.;
+					t_sum *= 0.;
+					count *= 0;
+
+				}
+				else if(i == end_index){
+
+					for (int N = 1; N <= maxWireGroup; N++){
+					
+						int j = N-1;
+
+						h_dQdx_xDrift[j]->Fill(x_sum[j]/count[j], dQdx_sum[j]/count[j]);
+							
+						if(-200. < x_sum[j]/count[j] && x_sum[j]/count[j] < 0.){
+							h_dQdx_tDriftL[j]->Fill(t_sum[j]/(count[j]*2000) - 0.2 - *read_t0/1000000, dQdx_sum[j]/count[j]);
+						}
+
+						if(0. < x_sum[j]/count[j] && x_sum[j]/count[j] < 200.){
+							h_dQdx_tDriftR[j]->Fill(t_sum[j]/(count[j]*2000) - 0.2 - *read_t0/1000000, dQdx_sum[j]/count[j]);
+						}
+					}	
+
+					dQdx_sum *= 0.;
+					x_sum *= 0.;
+					t_sum *= 0.;
+					count *= 0;
+
+				}
+				else{
+
+					for (int N = 1; N <= maxWireGroup; N++){
+						
+						int j = N-1;
+
+						if(count[j] == N){
+
+							h_dQdx_xDrift[j]->Fill(x_sum[j]/count[j], dQdx_sum[j]/count[j]);
+							
+							if(-200. < x_sum[j]/count[j] && x_sum[j]/count[j] < 0.){
+								h_dQdx_tDriftL[j]->Fill(t_sum[j]/(count[j]*2000) - 0.2 - *read_t0/1000000, dQdx_sum[j]/count[j]);
+							}
+
+							if(0. < x_sum[j]/count[j] && x_sum[j]/count[j] < 200.){
+								h_dQdx_tDriftR[j]->Fill(t_sum[j]/(count[j]*2000) - 0.2 - *read_t0/1000000, dQdx_sum[j]/count[j]);
+							}
+
+							dQdx_sum[j] = 0.;
+							x_sum[j] = 0.;
+							t_sum[j] = 0.;
+							count[j] = 0;
+
+						}
+					}
+
+				}
+
+			
+			}
+		}
 
 	}
 
@@ -430,6 +553,57 @@ int main(int argc, char**argv) {
 		h_dQdx_xDrift_basic_corrected->GetZaxis()->SetTitleOffset(2.0);
 		h_dQdx_xDrift_basic_corrected->Draw("COLZ");
 		saveFig(c_plain, mydata_cosmics + fileSaveLoc + "dQdx_xDrift_corrected_" + fileSaveID);
+
+		openAndClear(c_plain);
+		h_dQdx_xDrift_basic->SetStats(0);
+		h_dQdx_xDrift_basic->SetTitle(";x (cm);dQ/dx (ADC/cm);Entries");
+		h_dQdx_xDrift_basic->GetXaxis()->SetLabelOffset(0.01);
+		h_dQdx_xDrift_basic->GetXaxis()->SetNdivisions(505);
+		h_dQdx_xDrift_basic->GetYaxis()->SetLabelOffset(0.01);
+		h_dQdx_xDrift_basic->GetYaxis()->SetNdivisions(505);
+		h_dQdx_xDrift_basic->GetYaxis()->SetTitleOffset(1.8);
+		setFontSize<TH2>(h_dQdx_xDrift_basic, 133, 25);
+		setFontSizeZ(h_dQdx_xDrift_basic, 133, 25);
+		h_dQdx_xDrift_basic->GetZaxis()->CenterTitle(true);
+		h_dQdx_xDrift_basic->GetZaxis()->SetTitleOffset(2.0);
+		h_dQdx_xDrift_basic->Draw("COLZ");
+		saveFig(c_plain, mydata_cosmics + fileSaveLoc + "dQdx_xDrift_" + fileSaveID);
+
+		h_dQdx_tDriftL_basic->SetStats(0);
+		h_dQdx_tDriftL_basic->SetTitle(";t (ms);dQ/dx (ADC/cm);Entries");
+		h_dQdx_tDriftL_basic->GetXaxis()->SetLabelOffset(0.01);
+		h_dQdx_tDriftL_basic->GetXaxis()->SetNdivisions(505);
+		h_dQdx_tDriftL_basic->GetYaxis()->SetLabelOffset(0.01);
+		h_dQdx_tDriftL_basic->GetYaxis()->SetNdivisions(505);
+		h_dQdx_tDriftL_basic->GetYaxis()->SetTitleOffset(1.8);
+		setFontSize<TH2>(h_dQdx_tDriftL_basic, 133, 25);
+		setFontSizeZ(h_dQdx_tDriftL_basic, 133, 25);
+		h_dQdx_tDriftL_basic->GetZaxis()->CenterTitle(true);
+		h_dQdx_tDriftL_basic->GetZaxis()->SetTitleOffset(2.0);
+
+		h_dQdx_tDriftR_basic->SetStats(0);
+		h_dQdx_tDriftR_basic->SetTitle(";t (ms);dQ/dx (ADC/cm);Entries");
+		h_dQdx_tDriftR_basic->GetXaxis()->SetLabelOffset(0.01);
+		h_dQdx_tDriftR_basic->GetXaxis()->SetNdivisions(505);
+		h_dQdx_tDriftR_basic->GetYaxis()->SetLabelOffset(0.01);
+		h_dQdx_tDriftR_basic->GetYaxis()->SetNdivisions(505);
+		h_dQdx_tDriftR_basic->GetYaxis()->SetTitleOffset(1.8);
+		setFontSize<TH2>(h_dQdx_tDriftR_basic, 133, 25);
+		setFontSizeZ(h_dQdx_tDriftR_basic, 133, 25);
+		h_dQdx_tDriftR_basic->GetZaxis()->CenterTitle(true);
+		h_dQdx_tDriftR_basic->GetZaxis()->SetTitleOffset(2.0);
+
+		c_split->cd();		
+		pad1->Draw();		
+		pad1->cd();	
+		h_dQdx_tDriftL_basic->Draw("COLZ");
+		c_split->cd();
+		pad2->Draw();
+		pad2->cd();
+		h_dQdx_tDriftR_basic->Draw("COLZ");
+		saveFig(c_split, mydata_cosmics + fileSaveLoc + "dQdx_tDrift_" + fileSaveID);
+
+
 		
 
 		expoParams_xDriftL.reset();
@@ -474,7 +648,7 @@ int main(int argc, char**argv) {
 				MPVplot_tDriftR_basic->SetPointError(MPVplot_tDriftR_basic->GetN() - 1, 0., pointError(projY_tDriftR_basic, fp_tDriftR));
 			}
 
-			if(j==35){
+			if(j==35 && plotProjY == true){
 				std::string projYtitle;
 				std::stringstream s1;
 				s1 << std::setprecision(4) << h_dQdx_xDrift_basic->GetXaxis()->GetBinLowEdge(j);
@@ -541,11 +715,9 @@ int main(int argc, char**argv) {
 		MPVplot_xDrift_basic->GetXaxis()->SetNdivisions(505);
 		setFontSize<TGraphErrors>(MPVplot_xDrift_basic, 133, 25);
 		MPVplot_xDrift_basic->Draw("AP");
-		//expoFit_xDriftL->SetLineColor(kRed);
 		expoFit_xDriftL->SetLineColor(coral);
 		expoFit_xDriftL->SetLineWidth(2.3);
 		expoFit_xDriftL->Draw("SAME");
-		//expoFit_xDriftR->SetLineColor(kViolet+4);
 		expoFit_xDriftR->SetLineColor(deepViolet);
 		expoFit_xDriftR->SetLineWidth(2.3);
 		expoFit_xDriftR->Draw("SAME");
@@ -553,39 +725,35 @@ int main(int argc, char**argv) {
 		stats->Draw();
 		saveFig(c_plain, mydata_cosmics + fileSaveLoc + "MPV_xDrift_" + fileSaveID);
 
-		setMarker(MPVplot_tDriftL_basic, kAzure - 3, 21, 0.5);
-		MPVplot_tDriftL_basic->SetTitle("dQ/dx MPV vs t Left TPC");
-		MPVplot_tDriftL_basic->GetXaxis()->SetTitle("t (ms)");
-		MPVplot_tDriftL_basic->GetYaxis()->SetTitle("dQ/dx MPV (ADC/cm)");
-		//expoFit_tDriftL->SetLineColor(kRed);
+		setMarker(MPVplot_tDriftL_basic, kAzure - 3, 21, 0.6);
+		MPVplot_tDriftL_basic->SetTitle("dQ/dx MPV vs t Left TPC;t (ms); dQ/dx MPV (ADC/cm)");
 		expoFit_tDriftL->SetLineColor(coral);
-		TPaveText *statsL = statsBox({.55,.80,.80,.88}, track_count, expoFit_tDriftL);
+		setFontSize<TGraphErrors>(MPVplot_tDriftL_basic, 133, 25);
+		TPaveText *statsL = statsBox({.45,.65,.80,.88}, track_count, expoFit_tDriftL);
 		setMarker(MPVplot_tDriftR_basic, kAzure - 3, 21, 0.5);
-		MPVplot_tDriftR_basic->SetTitle("dQ/dx MPV vs t Right TPC");
-		MPVplot_tDriftR_basic->GetXaxis()->SetTitle("t (ms)");
-		MPVplot_tDriftR_basic->GetYaxis()->SetTitle("dQ/dx MPV (ADC/cm)");
-		//expoFit_tDriftR->SetLineColor(kViolet+4);
+		MPVplot_tDriftR_basic->SetTitle("dQ/dx MPV vs t Right TPC;t (ms); dQ/dx MPV (ADC/cm)");
 		expoFit_tDriftR->SetLineColor(deepViolet);
-		TPaveText *statsR = statsBox({.55,.80,.80,.88}, track_count, expoFit_tDriftR);
+		setFontSize<TGraphErrors>(MPVplot_tDriftR_basic, 133, 25);
+		TPaveText *statsR = statsBox({.45,.65,.80,.88}, track_count, expoFit_tDriftR);
 		
-		c_split->cd();		
-		pad1->Draw();		
-		pad1->cd();	
+		c_split2->cd();		
+		pad12->Draw();		
+		pad12->cd();	
 		MPVplot_tDriftL_basic->Draw("AP");	
 		expoFit_tDriftL->Draw("SAME");
 		statsL->Draw();
-		c_split->cd();
-		pad2->Draw();
-		pad2->cd();
+		c_split2->cd();
+		pad22->Draw();
+		pad22->cd();
 		MPVplot_tDriftR_basic->Draw("AP");
 		expoFit_tDriftR->Draw("SAME");
 		statsR->Draw();
-		saveFig(c_split, mydata_cosmics + fileSaveLoc + "MPV_tDrift_" + fileSaveID);
+		saveFig(c_split2, mydata_cosmics + fileSaveLoc + "MPV_tDrift_" + fileSaveID);
 			
 	}
 
 	//Multiwire analysis
-	if(codeConfig == 1){
+	if(codeConfig == 1 || codeConfig == 2){
 		for(int i = 1; i <= maxWireGroup; i++){
 
 			expoParams_xDriftL.reset();
@@ -713,8 +881,10 @@ int main(int argc, char**argv) {
 		setMarker(g_lifeVwiresTL, coral, 47, 1.0);
 		setMarker(g_lifeVwiresTR, deepViolet, 47, 1.0);
 
-		g_lifeVwiresXL->SetTitle("TPC 0");
-		g_lifeVwiresXR->SetTitle("TPC 1");
+		//g_lifeVwiresXL->SetTitle("TPC East");
+		//g_lifeVwiresXR->SetTitle("TPC West");
+		g_lifeVwiresXL->SetTitle("x, left TPC");
+		g_lifeVwiresXR->SetTitle("x, right TPC");
 		g_lifeVwiresTL->SetTitle("t, left TPC");
 		g_lifeVwiresTR->SetTitle("t, right TPC");
 
@@ -727,7 +897,29 @@ int main(int argc, char**argv) {
 		setFontSize<TMultiGraph>(mg, 133, 25);
 		mg->Draw("AP");
 		c_plain->BuildLegend(0.4,0.7,0.6,0.88);
-		saveFig(c_plain, mydata_cosmics + fileSaveLoc + "MultiWirePlots/LifetimeVwireNum" + fileSaveID);
+		if(codeConfig == 1){
+			saveFig(c_plain, mydata_cosmics + fileSaveLoc + "MultiWirePlots/LifetimeVwireNum" + fileSaveID);
+		}
+		if(codeConfig == 2){
+			saveFig(c_plain, mydata_cosmics + fileSaveLoc + "MultiWirePlots/LifetimeVnumHits" + fileSaveID);
+		}
+
+		expoConstParams.reset();
+		SetExpoConstParameters(expoConstParams.fp);
+		expoConstParams.lb = 0.5;
+		expoConstParams.ub = 20.5;
+		expoConstFit = fitter(g_lifeVwiresXL,expoConstParams.lb, expoConstParams.ub, expoConstParams.fp, expoConstParams.efp, expoConstParams.cov, "expoConst");
+		expoConstFit->SetLineColor(mintGreen);
+		expoConstFit->SetLineWidth(2.3);
+
+		openAndClear(c_plain);
+		g_lifeVwiresXL->SetTitle(";N;#tau (ms)");
+		setFontSize<TGraphErrors>(g_lifeVwiresXL, 133, 25);
+		g_lifeVwiresXL->Draw("AP");
+		expoConstFit->Draw("SAME");
+		saveFig(c_plain, mydata_cosmics + fileSaveLoc + "diffusionExpo_" + fileSaveID);
+
+		std::cout << expoConstFit->GetParameter(1) << " pm " << expoConstFit->GetParError(1) << std::endl;
 
 	}
 	
@@ -808,6 +1000,13 @@ double_t expofunT(Double_t *x, Double_t *par){
    	return f;
 }
 
+double_t expofunConst(Double_t *x, Double_t *par){
+
+	Double_t xx = x[0];
+	Double_t f = par[0]*exp(-(xx/par[1])) + par[2];
+   	return f;
+}
+
 //Function to set LG fit initial values
 void SetLGParameters(TH1D *h, Double_t *fp, Double_t *efp, Double_t &lb, Double_t &ub){
 	//Adapted from Lan Nguyen's code which was adapted from Dom Barker's code etc.
@@ -841,6 +1040,13 @@ void SetLGParameters(TH1D *h, Double_t *fp, Double_t *efp, Double_t &lb, Double_
 void SetExpoParameters(Double_t *fp){
 	fp[0] = 1000.;
 	fp[1] = 10.;
+
+}
+
+void SetExpoConstParameters(Double_t *fp){
+	fp[0] = 3.44;
+	fp[1] = 1.67;
+	fp[2] = 11.;
 
 }
 
@@ -936,6 +1142,11 @@ TF1 *fitter(TGraphErrors *g, Double_t lbound, Double_t ubound, Double_t *fitpara
 		func_index = 3;
 		nParams = 4;
 	}
+	else if(!strcmp(funcName.c_str(), "expoConst")){
+		func = expofunConst;
+		func_index = 4;
+		nParams = 3;
+	}
 	else{
 		std::cout << "UNKNOWN FUNCTION" << std::endl;
 	}
@@ -961,6 +1172,13 @@ TF1 *fitter(TGraphErrors *g, Double_t lbound, Double_t ubound, Double_t *fitpara
 		fitfunc->SetParLimits(0,20,60);
 		fitfunc->SetParLimits(3,10,200);
 		fitfunc->SetParNames("Width","MPV","TotalArea","GSigma"); 
+	}
+	else if(func_index == 4){
+		fitfunc->SetParameters(fitparams[0], fitparams[1], fitparams[2]);
+		fitfunc->SetParError(0,fiterrors[0]);
+		fitfunc->SetParError(1,fiterrors[1]);
+		fitfunc->SetParError(2,fiterrors[2]);
+		fitfunc->SetParNames("Norm","Decay","Const");
 	}
 
 	g->Fit(FitFuncName,"LREQ");  //L = log likelihood method, E = error estimations using the Minos techniques, R = specied range, Q = quiet mode
@@ -1009,10 +1227,14 @@ void saveFig(TCanvas *c, std::string plotName){
 	std::string saveLocTempPNG = plotName + ".png";
 	std::string saveLocTempPDF = plotName + ".pdf";
 	std::string saveLocTempROOT = plotName + ".root";
+	std::string saveLocTempEMF = plotName + ".emf";
+	std::string saveLocTempSVG = plotName + ".svg";
 	
 	c->SaveAs(saveLocTempPNG.c_str());
 	c->SaveAs(saveLocTempPDF.c_str());
 	c->SaveAs(saveLocTempROOT.c_str());	
+	c->SaveAs(saveLocTempEMF.c_str());
+	c->SaveAs(saveLocTempSVG.c_str());
 
 }
 
@@ -1116,15 +1338,10 @@ template<class T> void setFontSize(T *h, int font, int size){
 
 void setFontSizeZ(TH2 *h, int font, int size){
 	
-	h->GetXaxis()->SetTitleFont(font);
-	h->GetXaxis()->SetTitleSize(size);
-	h->GetXaxis()->SetLabelFont(font);
-	h->GetXaxis()->SetLabelSize(size);
+	h->GetZaxis()->SetTitleFont(font);
+	h->GetZaxis()->SetTitleSize(size);
+	h->GetZaxis()->SetLabelFont(font);
+	h->GetZaxis()->SetLabelSize(size);
 
-	h->GetYaxis()->SetTitleFont(font);
-	h->GetYaxis()->SetTitleSize(size);
-	h->GetYaxis()->SetLabelFont(font);
-	h->GetYaxis()->SetLabelSize(size);
-	
 }
 
