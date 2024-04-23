@@ -38,6 +38,7 @@
 #include "TMultiGraph.h"
 
 //Local includes
+#include "Helpers/Constants.h"
 #include "Helpers/PlottingHelpers.h"
 #include "Helpers/PlottingHelpers.cpp"
 #include "Helpers/FittingHelpers.h"
@@ -46,6 +47,7 @@
 #include "Helpers/StatsHelpers.cpp"
 
 using namespace calib;
+using namespace constants;
 
 
 int main(int argc, char**argv) {
@@ -84,7 +86,7 @@ int main(int argc, char**argv) {
 	
 	std::cout << "----Retrieving file----------------------------------------------------" << std::endl;
 
-	//define names of plots
+	//folder for results
 	std::string mydata_cosmics = "/exp/sbnd/data/users/abeever/cosmics_analysis/";
 
 	//Read in data files line by line and chain together
@@ -226,11 +228,11 @@ int main(int argc, char**argv) {
 	pad22->SetLeftMargin(0.18);
 
 	//Sheffield colour scheme
-	Int_t deepViolet = TColor::GetColor("#440099");
+	/*Int_t deepViolet = TColor::GetColor("#440099");
 	Int_t coral = TColor::GetColor("#E7004C");
 	Int_t powderBlue = TColor::GetColor("#9ADBE8");
 	Int_t flamingo = TColor::GetColor("#FF6371");
-	Int_t mintGreen = TColor::GetColor("#00CE7C");
+	Int_t mintGreen = TColor::GetColor("#00CE7C");*/
 
 
 	treereader.Restart();
