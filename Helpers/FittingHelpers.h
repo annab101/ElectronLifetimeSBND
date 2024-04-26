@@ -192,6 +192,15 @@ namespace calib {
     
     TF1 *fitter(TGraphErrors *g, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *fiterrors, Double_t *covmat, std::string funcName);
 
+    /**
+    * @brief Function to find angular bin limits.
+    *
+    * @param angBins number of angular bins
+    *
+    */
+
+    double** getAngBinLimits(int angBins);
+
 }
 
 #endif

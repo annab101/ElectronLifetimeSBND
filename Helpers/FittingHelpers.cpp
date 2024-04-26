@@ -277,4 +277,32 @@ namespace calib {
         
     }
 
+    double** getAngBinLimits(int angBins){
+
+        double angWindow = 136.4;
+		double angLowLimit1 = -68.2;
+		double angUpLimit1 = 68.2;
+		double angLowLimit2 = 111.8;
+		double angUpLimit2 = 248.2;
+
+		double angStep = angWindow*2/(double)angBins;
+
+        double** angLimits = new double*[2];
+        angLimits[0] = new double[angBins/2+1];
+        angLimits[1] = new double[angBins/2+1];
+		
+        angLimits[0][0] = -68.2;
+        angLimits[1][0] = 111.8;
+
+		for(int i = 1; i <= angBins/2; i++){
+
+			angLimits[0][i] = angLimits[0][i-1] + angStep;
+			angLimits[1][i] = angLimits[1][i-1] + angStep;
+
+		}
+
+        return angLimits;
+
+    }
+
 }

@@ -10,6 +10,8 @@ mindQdx = 200
 maxdQdx = 1800
 minT = 0.
 maxT = 1.3
+maxWireGroup = 20
+writeProjY = 0
 
 dataset = 2022Asample200
 saveLoc = /exp/sbnd/data/users/abeever/cosmics_analysis/Lifetime/

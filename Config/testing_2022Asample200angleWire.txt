@@ -12,6 +12,7 @@ minT = 0.
 maxT = 1.3
 angBins = 6
 maxWireGroup = 20
+writeProjY = 0
 
 dataset = 2022Asample200
 saveLoc = /exp/sbnd/data/users/abeever/cosmics_analysis/Lifetime/

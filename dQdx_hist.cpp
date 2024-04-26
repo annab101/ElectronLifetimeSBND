@@ -182,9 +182,11 @@ int main(int argc, char**argv) {
 		TH2D** h_dQdx_tDriftR_wires = new TH2D*[maxWireGroup];
 
 		for(int i = 1; i <= maxWireGroup; i++){
+
 			h_dQdx_xDrift_wires[i-1] = new TH2D(TString::Format("h_dQdx_xDrift_%dwires", i),"dQ/dx vs x", NBinsX, minX, maxX, NBinsdQdx, mindQdx, maxdQdx);
 			h_dQdx_tDriftL_wires[i-1] = new TH2D(TString::Format("h_dQdx_tDriftL_%dwires", i),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 			h_dQdx_tDriftR_wires[i-1] = new TH2D(TString::Format("h_dQdx_tDriftR_%dwires", i),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+		
 		}
 
 		treereader.Restart();
@@ -354,13 +356,6 @@ int main(int argc, char**argv) {
 			int end_index = std::distance(read_x.begin(), it_end_x);
 			if(end_index < 0){continue;}
 
-			int minWire = read_wire[start_index];
-			int maxWire = read_wire[end_index];
-
-			if(minWire > maxWire){
-				std::swap(minWire, maxWire);
-			}
-
 			std::valarray<double> dQdx_sum(0.,maxWireGroup);
 			std::valarray<double> x_sum(0.,maxWireGroup);
 			std::valarray<double> t_sum(0.,maxWireGroup);
@@ -473,29 +468,7 @@ int main(int argc, char**argv) {
 
 		TFile f3((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 
-		double angWindow = 136.4;
-		double angLowLimit1 = -68.2;
-		double angUpLimit1 = 68.2;
-		double angLowLimit2 = 111.8;
-		double angUpLimit2 = 248.2;
-
-		double angStep = angWindow*2/(double)angBins;
-
-		std::vector<double> angLimits1{-68.2}, angLimits2{111.8};
-
-		for(int i = 0; i < angBins/2; i++){
-
-			angLimits1.push_back(angLimits1[i] + angStep);
-			angLimits2.push_back(angLimits2[i] + angStep);
-
-		}
-
-		for(int i = 0; i < angLimits1.size(); i++){
-
-			std::cout << angLimits1[i] << std::endl;
-			std::cout << angLimits2[i] << std::endl;
-
-		}
+		double** angBinLimits = getAngBinLimits(angBins);
 
 		TH2D** h_dQdx_xDrift_ang = new TH2D*[angBins];
 		TH2D** h_dQdx_tDriftL_ang = new TH2D*[angBins];
@@ -503,13 +476,13 @@ int main(int argc, char**argv) {
 
 		for(int i = 0; i < angBins/2; i++){
 
-			h_dQdx_xDrift_ang[i] = new TH2D(TString::Format("h_dQdx_xDrift_ang%ito%i", (int)angLimits1[i], (int)angLimits1[i+1]),"dQ/dx vs x", NBinsX, minX, maxX, NBinsdQdx, mindQdx, maxdQdx);
-			h_dQdx_tDriftL_ang[i] = new TH2D(TString::Format("h_dQdx_tDriftL_ang%ito%i", (int)angLimits1[i], (int)angLimits1[i+1]),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
-			h_dQdx_tDriftR_ang[i] = new TH2D(TString::Format("h_dQdx_tDriftR_ang%ito%i", (int)angLimits1[i], (int)angLimits1[i+1]),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+			h_dQdx_xDrift_ang[i] = new TH2D(TString::Format("h_dQdx_xDrift_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]),"dQ/dx vs x", NBinsX, minX, maxX, NBinsdQdx, mindQdx, maxdQdx);
+			h_dQdx_tDriftL_ang[i] = new TH2D(TString::Format("h_dQdx_tDriftL_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+			h_dQdx_tDriftR_ang[i] = new TH2D(TString::Format("h_dQdx_tDriftR_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 
-			h_dQdx_xDrift_ang[i + angBins/2] = new TH2D(TString::Format("h_dQdx_xDrift_ang%dto%d", (int)angLimits2[i], (int)angLimits2[i+1]),"dQ/dx vs x", NBinsX, minX, maxX, NBinsdQdx, mindQdx, maxdQdx);
-			h_dQdx_tDriftL_ang[i + angBins/2] = new TH2D(TString::Format("h_dQdx_tDriftL_ang%dto%d", (int)angLimits2[i], (int)angLimits2[i+1]),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
-			h_dQdx_tDriftR_ang[i + angBins/2] = new TH2D(TString::Format("h_dQdx_tDriftR_ang%dto%d", (int)angLimits2[i], (int)angLimits2[i+1]),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+			h_dQdx_xDrift_ang[i + angBins/2] = new TH2D(TString::Format("h_dQdx_xDrift_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]),"dQ/dx vs x", NBinsX, minX, maxX, NBinsdQdx, mindQdx, maxdQdx);
+			h_dQdx_tDriftL_ang[i + angBins/2] = new TH2D(TString::Format("h_dQdx_tDriftL_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+			h_dQdx_tDriftR_ang[i + angBins/2] = new TH2D(TString::Format("h_dQdx_tDriftR_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 
 		}
 
@@ -543,12 +516,12 @@ int main(int argc, char**argv) {
 
 			for(int i = 0; i < angBins/2; i++){
 
-				if(angLimits1[i] <= track_azimuth && track_azimuth < angLimits1[i+1]){
+				if(angBinLimits[0][i] <= track_azimuth && track_azimuth < angBinLimits[0][i+1]){
 
 					angle_index = i;
 
 				}
-				else if(angLimits2[i] <= track_azimuth && track_azimuth < angLimits2[i+1]){
+				else if(angBinLimits[1][i] <= track_azimuth && track_azimuth < angBinLimits[1][i+1]){
 
 					angle_index = i + angBins/2;
 
@@ -592,33 +565,7 @@ int main(int argc, char**argv) {
 
 		TFile f4((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 
-		double angWindow = 136.4;
-		double angLowLimit1 = -68.2;
-		double angUpLimit1 = 68.2;
-		double angLowLimit2 = 111.8;
-		double angUpLimit2 = 248.2;
-
-		double angStep = angWindow*2/(double)angBins;
-
-		std::vector<double> angLimits1{-68.2}, angLimits2{111.8};
-
-		for(int i = 0; i < angBins/2; i++){
-
-			angLimits1.push_back(angLimits1[i] + angStep);
-			angLimits2.push_back(angLimits2[i] + angStep);
-
-		}
-
-		for(int i = 0; i < angLimits1.size(); i++){
-
-			std::cout << angLimits1[i] << std::endl;
-			std::cout << angLimits2[i] << std::endl;
-
-		}
-
-		/*TH2D** h_dQdx_xDrift_angWire = new TH2D*[angBins][maxWireGroup];
-		TH2D** h_dQdx_tDriftL_angWire = new TH2D*[angBins][maxWireGroup];
-		TH2D** h_dQdx_tDriftR_angWire = new TH2D*[angBins][maxWireGroup];*/
+		double** angBinLimits = getAngBinLimits(angBins);
 
 		TH2D *h_dQdx_xDrift_angWire[angBins][maxWireGroup];
 		TH2D *h_dQdx_tDriftL_angWire[angBins][maxWireGroup];
@@ -629,13 +576,13 @@ int main(int argc, char**argv) {
 
 			for(int j = 1; j <= maxWireGroup; j++){
 
-				h_dQdx_xDrift_angWire[i][j-1] = new TH2D(TString::Format("h_dQdx_xDrift_ang%ito%inWires%d", (int)angLimits1[i], (int)angLimits1[i+1],j),"dQ/dx vs x", NBinsX, minX, maxX, NBinsdQdx, mindQdx, maxdQdx);
-				h_dQdx_tDriftL_angWire[i][j-1] = new TH2D(TString::Format("h_dQdx_tDriftL_ang%ito%inWires%d", (int)angLimits1[i], (int)angLimits1[i+1],j),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
-				h_dQdx_tDriftR_angWire[i][j-1] = new TH2D(TString::Format("h_dQdx_tDriftR_ang%ito%inWires%d", (int)angLimits1[i], (int)angLimits1[i+1],j),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+				h_dQdx_xDrift_angWire[i][j-1] = new TH2D(TString::Format("h_dQdx_xDrift_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1],j),"dQ/dx vs x", NBinsX, minX, maxX, NBinsdQdx, mindQdx, maxdQdx);
+				h_dQdx_tDriftL_angWire[i][j-1] = new TH2D(TString::Format("h_dQdx_tDriftL_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1],j),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+				h_dQdx_tDriftR_angWire[i][j-1] = new TH2D(TString::Format("h_dQdx_tDriftR_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1],j),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 
-				h_dQdx_xDrift_angWire[i + angBins/2][j-1] = new TH2D(TString::Format("h_dQdx_xDrift_ang%dto%dnWires%d", (int)angLimits2[i], (int)angLimits2[i+1],j),"dQ/dx vs x", NBinsX, minX, maxX, NBinsdQdx, mindQdx, maxdQdx);
-				h_dQdx_tDriftL_angWire[i + angBins/2][j-1] = new TH2D(TString::Format("h_dQdx_tDriftL_ang%dto%dnWires%d", (int)angLimits2[i], (int)angLimits2[i+1],j),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
-				h_dQdx_tDriftR_angWire[i + angBins/2][j-1] = new TH2D(TString::Format("h_dQdx_tDriftR_ang%dto%dnWires%d", (int)angLimits2[i], (int)angLimits2[i+1],j),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+				h_dQdx_xDrift_angWire[i + angBins/2][j-1] = new TH2D(TString::Format("h_dQdx_xDrift_ang%dto%dnWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1],j),"dQ/dx vs x", NBinsX, minX, maxX, NBinsdQdx, mindQdx, maxdQdx);
+				h_dQdx_tDriftL_angWire[i + angBins/2][j-1] = new TH2D(TString::Format("h_dQdx_tDriftL_ang%dto%dnWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1],j),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+				h_dQdx_tDriftR_angWire[i + angBins/2][j-1] = new TH2D(TString::Format("h_dQdx_tDriftR_ang%dto%dnWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1],j),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 
 			}
 
@@ -683,12 +630,12 @@ int main(int argc, char**argv) {
 
 			for(int i = 0; i < angBins/2; i++){
 
-				if(angLimits1[i] <= track_azimuth && track_azimuth < angLimits1[i+1]){
+				if(angBinLimits[0][i] <= track_azimuth && track_azimuth < angBinLimits[0][i+1]){
 
 					angle_index = i;
 
 				}
-				else if(angLimits2[i] <= track_azimuth && track_azimuth < angLimits2[i+1]){
+				else if(angBinLimits[1][i] <= track_azimuth && track_azimuth < angBinLimits[1][i+1]){
 
 					angle_index = i + angBins/2;
 
