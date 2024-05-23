@@ -124,6 +124,8 @@ int main(int argc, char**argv) {
 		TH2D* h_dQdx_tDriftL_basic = new TH2D("h_dQdx_tDriftL_basic", "dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 		TH2D* h_dQdx_tDriftR_basic = new TH2D("h_dQdx_tDriftR_basic", "dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 
+		TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
+
 		treereader.Restart();
 		while(treereader.Next()){
 
@@ -133,6 +135,7 @@ int main(int argc, char**argv) {
 
 			if(track_count % 100 == 0){std::cout << "track_count: " << track_count << std::endl;}
 			track_count ++;	
+			h_stats->Fill(1.);
 
 			auto it_start_x = std::find_if(read_x.begin(), read_x.end(), [](float f){return !std::isnan(f);});
 			int start_index = std::distance(read_x.begin(), it_start_x);
@@ -163,11 +166,11 @@ int main(int argc, char**argv) {
 		h_dQdx_xDrift_basic->Write();
 		h_dQdx_tDriftL_basic->Write();
 		h_dQdx_tDriftR_basic->Write();
+		h_stats->Write();
 
 		f0.Close();
 				
 	}
-
 
 	if(codeConfig == 1){
 
@@ -189,6 +192,8 @@ int main(int argc, char**argv) {
 		
 		}
 
+		TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
+
 		treereader.Restart();
 		while(treereader.Next()){
 
@@ -199,6 +204,7 @@ int main(int argc, char**argv) {
 			//Track counter
 			if(track_count % 100 == 0){std::cout << "track_count: " << track_count << std::endl;}
 			track_count ++;	
+			h_stats->Fill(1.);
 
 			auto it_start_x = std::find_if(read_x.begin(), read_x.end(), [](float f){return !std::isnan(f);});
 			int start_index = std::distance(read_x.begin(), it_start_x);
@@ -315,6 +321,8 @@ int main(int argc, char**argv) {
 
 		}
 
+		h_stats->Write();
+
 		f1.Close();
 
 	}
@@ -337,6 +345,8 @@ int main(int argc, char**argv) {
 			h_dQdx_tDriftR_hits[i-1] = new TH2D(TString::Format("h_dQdx_tDriftR_%dhits", i),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 		}
 
+		TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
+
 		treereader.Restart();
 		while(treereader.Next()){
 
@@ -347,6 +357,7 @@ int main(int argc, char**argv) {
 			//Track counter
 			if(track_count % 100 == 0){std::cout << "track_count: " << track_count << std::endl;}
 			track_count ++;	
+			h_stats->Fill(1.);
 
 			auto it_start_x = std::find_if(read_x.begin(), read_x.end(), [](float f){return !std::isnan(f);});
 			int start_index = std::distance(read_x.begin(), it_start_x);
@@ -456,6 +467,8 @@ int main(int argc, char**argv) {
 
 		}
 
+		h_stats->Write();
+
 		f2.Close();
 
 	}
@@ -486,6 +499,8 @@ int main(int argc, char**argv) {
 
 		}
 
+		TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
+
 		treereader.Restart();
 		while(treereader.Next()){
 
@@ -495,6 +510,7 @@ int main(int argc, char**argv) {
 
 			if(track_count % 100 == 0){std::cout << "track_count: " << track_count << std::endl;}
 			track_count ++;	
+			h_stats->Fill(1.);
 
 			auto it_start_x = std::find_if(read_x.begin(), read_x.end(), [](float f){return !std::isnan(f);});
 			int start_index = std::distance(read_x.begin(), it_start_x);
@@ -553,6 +569,8 @@ int main(int argc, char**argv) {
 
 		}
 
+		h_stats->Write();
+
 		f3.Close();
 
 	}
@@ -588,6 +606,8 @@ int main(int argc, char**argv) {
 
 		}
 
+		TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
+
 		treereader.Restart();
 		while(treereader.Next()){
 
@@ -597,6 +617,7 @@ int main(int argc, char**argv) {
 
 			if(track_count % 100 == 0){std::cout << "track_count: " << track_count << std::endl;}
 			track_count ++;	
+			h_stats->Fill(1.);
 
 			auto it_start_x = std::find_if(read_x.begin(), read_x.end(), [](float f){return !std::isnan(f);});
 			int start_index = std::distance(read_x.begin(), it_start_x);
@@ -740,6 +761,8 @@ int main(int argc, char**argv) {
 			}
 
 		}
+
+		h_stats->Write();
 
 		f4.Close();
 
