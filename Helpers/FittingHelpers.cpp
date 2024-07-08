@@ -1,5 +1,7 @@
 #include "FittingHelpers.h"
 
+using namespace constants;
+
 namespace calib {
 
     double_t langaufun(Double_t *x, Double_t *par) {
@@ -62,7 +64,6 @@ namespace calib {
 
     double_t expofunX(Double_t *x, Double_t *par){
 
-        double vDrift = 156.267;
         Double_t xx = x[0];
         Double_t f = par[0]*exp(-((200-TMath::Abs(xx))/(par[1]*vDrift)));
         return f;
@@ -252,6 +253,7 @@ namespace calib {
             fitfunc->SetParError(0,fiterrors[0]);
             fitfunc->SetParError(1,fiterrors[1]);
             fitfunc->SetParError(2,fiterrors[2]);
+            fitfunc->SetParLimits(0,0,100);
             fitfunc->SetParNames("Norm","Decay","Const");
         }
 

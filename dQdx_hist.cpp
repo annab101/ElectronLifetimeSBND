@@ -59,6 +59,7 @@ int main(int argc, char**argv) {
 	double minT = 0.;
 	double maxT = 1.3;	
 	int angBins = 6;
+	std::string configLabel = "noConfigLabel";
 
 	p->getValue("inputData", inputData);
 	p->getValue("tag", tag);
@@ -76,6 +77,7 @@ int main(int argc, char**argv) {
 	p->getValue("minT", minT);
 	p->getValue("maxT", maxT);
 	p->getValue("angBins", angBins);
+	configLabel = configMap[codeConfig];
 
 	//Read in data files line by line and chain together
 	TChain *chain = new TChain;
@@ -110,21 +112,18 @@ int main(int argc, char**argv) {
 	TTreeReaderValue<int> read_selected(treereader, "trk.selected");
 	TTreeReaderArray<uint16_t> read_wire(treereader, "trk.hits2.h.wire");
 
+	std::filesystem::create_directory((saveLoc + dataset + "_" + configLabel).c_str());
+
+	TFile f((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
+
 	int track_count = 0;
+	TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
 
 	if(codeConfig == 0){
-
-		std::string configLabel = "classic";
-
-		std::filesystem::create_directory((saveLoc + dataset + "_" + configLabel).c_str());
-
-		TFile f0((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 
 		TH2D* h_dQdx_xDrift_basic = new TH2D("h_dQdx_xDrift_basic", "dQ/dx vs x", NBinsX, minX, maxX, NBinsdQdx, mindQdx, maxdQdx);
 		TH2D* h_dQdx_tDriftL_basic = new TH2D("h_dQdx_tDriftL_basic", "dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 		TH2D* h_dQdx_tDriftR_basic = new TH2D("h_dQdx_tDriftR_basic", "dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
-
-		TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
 
 		treereader.Restart();
 		while(treereader.Next()){
@@ -168,17 +167,11 @@ int main(int argc, char**argv) {
 		h_dQdx_tDriftR_basic->Write();
 		h_stats->Write();
 
-		f0.Close();
+		f.Close();
 				
 	}
 
 	if(codeConfig == 1){
-
-		std::string configLabel = "multiwire";
-
-		std::filesystem::create_directory((saveLoc + dataset + "_" + configLabel).c_str());
-
-		TFile f1((saveLoc + dataset + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 
 		TH2D** h_dQdx_xDrift_wires = new TH2D*[maxWireGroup];
 		TH2D** h_dQdx_tDriftL_wires = new TH2D*[maxWireGroup];
@@ -191,8 +184,6 @@ int main(int argc, char**argv) {
 			h_dQdx_tDriftR_wires[i-1] = new TH2D(TString::Format("h_dQdx_tDriftR_%dwires", i),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 		
 		}
-
-		TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
 
 		treereader.Restart();
 		while(treereader.Next()){
@@ -323,17 +314,11 @@ int main(int argc, char**argv) {
 
 		h_stats->Write();
 
-		f1.Close();
+		f.Close();
 
 	}
 
 	if(codeConfig == 2){
-
-		std::string configLabel = "multihit";
-
-		std::filesystem::create_directory((saveLoc + dataset + "_" + configLabel).c_str());
-
-		TFile f2((saveLoc + dataset + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 
 		TH2D** h_dQdx_xDrift_hits = new TH2D*[maxWireGroup];
 		TH2D** h_dQdx_tDriftL_hits = new TH2D*[maxWireGroup];
@@ -344,8 +329,6 @@ int main(int argc, char**argv) {
 			h_dQdx_tDriftL_hits[i-1] = new TH2D(TString::Format("h_dQdx_tDriftL_%dhits", i),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 			h_dQdx_tDriftR_hits[i-1] = new TH2D(TString::Format("h_dQdx_tDriftR_%dhits", i),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 		}
-
-		TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
 
 		treereader.Restart();
 		while(treereader.Next()){
@@ -469,17 +452,11 @@ int main(int argc, char**argv) {
 
 		h_stats->Write();
 
-		f2.Close();
+		f.Close();
 
 	}
 
 	if(codeConfig == 3){
-
-		std::string configLabel = "angle";
-
-		std::filesystem::create_directory((saveLoc + dataset + "_" + configLabel).c_str());
-
-		TFile f3((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 
 		double** angBinLimits = getAngBinLimits(angBins);
 
@@ -498,8 +475,6 @@ int main(int argc, char**argv) {
 			h_dQdx_tDriftR_ang[i + angBins/2] = new TH2D(TString::Format("h_dQdx_tDriftR_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
 
 		}
-
-		TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
 
 		treereader.Restart();
 		while(treereader.Next()){
@@ -571,17 +546,11 @@ int main(int argc, char**argv) {
 
 		h_stats->Write();
 
-		f3.Close();
+		f.Close();
 
 	}
 
 	if(codeConfig == 4){
-
-		std::string configLabel = "wireAndAngle";
-
-		std::filesystem::create_directory((saveLoc + dataset + "_" + configLabel).c_str());
-
-		TFile f4((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 
 		double** angBinLimits = getAngBinLimits(angBins);
 
@@ -605,8 +574,6 @@ int main(int argc, char**argv) {
 			}
 
 		}
-
-		TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
 
 		treereader.Restart();
 		while(treereader.Next()){
@@ -764,7 +731,7 @@ int main(int argc, char**argv) {
 
 		h_stats->Write();
 
-		f4.Close();
+		f.Close();
 
 	}
 

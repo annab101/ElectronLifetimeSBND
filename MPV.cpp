@@ -61,6 +61,7 @@ int main(int argc, char**argv) {
 	double maxT = 1.3;	
 	int angBins = 6;
 	int writeProjY = 0;
+	std::string configLabel = "noConfigLabel";
 
 	p->getValue("inputData", inputData);
 	p->getValue("tag", tag);
@@ -79,17 +80,17 @@ int main(int argc, char**argv) {
 	p->getValue("maxT", maxT);
 	p->getValue("angBins", angBins);
 	p->getValue("writeProjY", writeProjY);
+	
+	configLabel = configMap[codeConfig];
 
+	TFile f((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
+	TFile ff((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 
 	if(codeConfig == 0){
 
-		std::string configLabel = "classic";
-
-		TFile f0((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-
-		TH2D* h_dQdx_xDrift_basic = (TH2D*)f0.Get("h_dQdx_xDrift_basic");
-		TH2D* h_dQdx_tDriftL_basic = (TH2D*)f0.Get("h_dQdx_tDriftL_basic");
-		TH2D* h_dQdx_tDriftR_basic = (TH2D*)f0.Get("h_dQdx_tDriftR_basic");
+		TH2D* h_dQdx_xDrift_basic = (TH2D*)f.Get("h_dQdx_xDrift_basic");
+		TH2D* h_dQdx_tDriftL_basic = (TH2D*)f.Get("h_dQdx_tDriftL_basic");
+		TH2D* h_dQdx_tDriftR_basic = (TH2D*)f.Get("h_dQdx_tDriftR_basic");
 		
 		TH1D* projY_xDrift_basic = new TH1D();
 		TH1D* projY_tDriftL_basic = new TH1D();
@@ -107,8 +108,8 @@ int main(int argc, char**argv) {
 		TGraphErrors *MPVplot_tDriftL_basic = new TGraphErrors();
 		TGraphErrors *MPVplot_tDriftR_basic = new TGraphErrors();
 
-		TFile f00((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
-		f00.cd();
+		TFile ff((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
+		ff.cd();
 
 		for(int i = 1; i <= NBinsX; i++){
 
@@ -152,6 +153,18 @@ int main(int argc, char**argv) {
 				MPVplot_tDriftR_basic->SetPointError(MPVplot_tDriftR_basic->GetN() - 1, 0., pointError(projY_tDriftR_basic, fp_tDriftR));
 			}
 
+			if((bool)writeProjY){
+
+				LGfit_xDrift_basic->SetName(TString::Format("LGfit_xDrift_basic_bin%d",i));
+				LGfit_tDriftL_basic->SetName(TString::Format("LGfit_tDriftL_basic_bin%d",i));
+				LGfit_tDriftR_basic->SetName(TString::Format("LGfit_tDriftR_basic_bin%d",i));
+
+				LGfit_xDrift_basic->Write();
+				LGfit_tDriftL_basic->Write();
+				LGfit_tDriftR_basic->Write();
+
+			}
+
 		}
 
 		MPVplot_xDrift_basic->SetName("MPVplot_xDrift_basic");
@@ -166,19 +179,15 @@ int main(int argc, char**argv) {
 
 	if(codeConfig == 1){
 
-		std::string configLabel = "multiwire";
-
-		TFile f1((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-
 		TH2D* h_dQdx_xDrift_wires[maxWireGroup];
 		TH2D* h_dQdx_tDriftL_wires[maxWireGroup];
 		TH2D* h_dQdx_tDriftR_wires[maxWireGroup];
 
 		for(int i = 1; i <= maxWireGroup; i++){
 
-			h_dQdx_xDrift_wires[i-1] = (TH2D*)f1.Get(TString::Format("h_dQdx_xDrift_%dwires", i));
-			h_dQdx_tDriftL_wires[i-1] = (TH2D*)f1.Get(TString::Format("h_dQdx_tDriftL_%dwires", i));
-			h_dQdx_tDriftR_wires[i-1] = (TH2D*)f1.Get(TString::Format("h_dQdx_tDriftR_%dwires", i));
+			h_dQdx_xDrift_wires[i-1] = (TH2D*)f.Get(TString::Format("h_dQdx_xDrift_%dwires", i));
+			h_dQdx_tDriftL_wires[i-1] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftL_%dwires", i));
+			h_dQdx_tDriftR_wires[i-1] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftR_%dwires", i));
 
 		}
 
@@ -206,8 +215,8 @@ int main(int argc, char**argv) {
 
 		}
 
-		TFile f11((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
-		f11.cd();
+		TFile ff((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
+		ff.cd();
 
 		for(int i = 1; i <= maxWireGroup; i++){
 
@@ -273,19 +282,15 @@ int main(int argc, char**argv) {
 
 	if(codeConfig == 2){
 
-		std::string configLabel = "multihit";
-
-		TFile f2((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-
 		TH2D* h_dQdx_xDrift_hits[maxWireGroup];
 		TH2D* h_dQdx_tDriftL_hits[maxWireGroup];
 		TH2D* h_dQdx_tDriftR_hits[maxWireGroup];
 
 		for(int i = 1; i <= maxWireGroup; i++){
 
-			h_dQdx_xDrift_hits[i-1] = (TH2D*)f2.Get(TString::Format("h_dQdx_xDrift_%dhits", i));
-			h_dQdx_tDriftL_hits[i-1] = (TH2D*)f2.Get(TString::Format("h_dQdx_tDriftL_%dhits", i));
-			h_dQdx_tDriftR_hits[i-1] = (TH2D*)f2.Get(TString::Format("h_dQdx_tDriftR_%dhits", i));
+			h_dQdx_xDrift_hits[i-1] = (TH2D*)f.Get(TString::Format("h_dQdx_xDrift_%dhits", i));
+			h_dQdx_tDriftL_hits[i-1] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftL_%dhits", i));
+			h_dQdx_tDriftR_hits[i-1] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftR_%dhits", i));
 
 		}
 
@@ -313,8 +318,8 @@ int main(int argc, char**argv) {
 
 		}
 
-		TFile f22((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
-		f22.cd();
+		TFile ff((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
+		ff.cd();
 
 		for(int i = 1; i <= maxWireGroup; i++){
 
@@ -380,10 +385,6 @@ int main(int argc, char**argv) {
 
 	if(codeConfig == 3){
 
-		std::string configLabel = "angle";
-
-		TFile f3((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-
 		TH2D* h_dQdx_xDrift_ang[angBins];
 		TH2D* h_dQdx_tDriftL_ang[angBins];
 		TH2D* h_dQdx_tDriftR_ang[angBins];
@@ -392,13 +393,13 @@ int main(int argc, char**argv) {
 
 		for(int i = 0; i < angBins/2; i++){
 
-			h_dQdx_xDrift_ang[i] = (TH2D*)f3.Get(TString::Format("h_dQdx_xDrift_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
-			h_dQdx_tDriftL_ang[i] = (TH2D*)f3.Get(TString::Format("h_dQdx_tDriftL_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
-			h_dQdx_tDriftR_ang[i] = (TH2D*)f3.Get(TString::Format("h_dQdx_tDriftR_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
+			h_dQdx_xDrift_ang[i] = (TH2D*)f.Get(TString::Format("h_dQdx_xDrift_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
+			h_dQdx_tDriftL_ang[i] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftL_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
+			h_dQdx_tDriftR_ang[i] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftR_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
 
-			h_dQdx_xDrift_ang[i + angBins/2] = (TH2D*)f3.Get(TString::Format("h_dQdx_xDrift_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]));
-			h_dQdx_tDriftL_ang[i + angBins/2] = (TH2D*)f3.Get(TString::Format("h_dQdx_tDriftL_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]));
-			h_dQdx_tDriftR_ang[i + angBins/2] = (TH2D*)f3.Get(TString::Format("h_dQdx_tDriftR_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]));
+			h_dQdx_xDrift_ang[i + angBins/2] = (TH2D*)f.Get(TString::Format("h_dQdx_xDrift_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]));
+			h_dQdx_tDriftL_ang[i + angBins/2] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftL_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]));
+			h_dQdx_tDriftR_ang[i + angBins/2] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftR_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]));
 
 		}
 
@@ -426,8 +427,8 @@ int main(int argc, char**argv) {
 
 		}
 
-		TFile f33((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
-		f33.cd();
+		TFile ff((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
+		ff.cd();
 
 		for(int i = 0; i < angBins/2; i++){
 
@@ -539,10 +540,6 @@ int main(int argc, char**argv) {
 
 	if(codeConfig == 4){
 
-		std::string configLabel = "wireAndAngle";
-
-		TFile f4((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-
 		TH2D* h_dQdx_xDrift_angWire[angBins][maxWireGroup];
 		TH2D* h_dQdx_tDriftL_angWire[angBins][maxWireGroup];
 		TH2D* h_dQdx_tDriftR_angWire[angBins][maxWireGroup];
@@ -553,13 +550,13 @@ int main(int argc, char**argv) {
 
 			for(int j = 1; j <= maxWireGroup; j++){
 
-				h_dQdx_xDrift_angWire[i][j-1] = (TH2D*)f4.Get(TString::Format("h_dQdx_xDrift_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1],j));
-				h_dQdx_tDriftL_angWire[i][j-1] = (TH2D*)f4.Get(TString::Format("h_dQdx_tDriftL_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1],j));
-				h_dQdx_tDriftR_angWire[i][j-1] = (TH2D*)f4.Get(TString::Format("h_dQdx_tDriftR_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1],j));
+				h_dQdx_xDrift_angWire[i][j-1] = (TH2D*)f.Get(TString::Format("h_dQdx_xDrift_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1],j));
+				h_dQdx_tDriftL_angWire[i][j-1] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftL_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1],j));
+				h_dQdx_tDriftR_angWire[i][j-1] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftR_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1],j));
 
-				h_dQdx_xDrift_angWire[i + angBins/2][j-1] = (TH2D*)f4.Get(TString::Format("h_dQdx_xDrift_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1],j));
-				h_dQdx_tDriftL_angWire[i + angBins/2][j-1] = (TH2D*)f4.Get(TString::Format("h_dQdx_tDriftL_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1],j));
-				h_dQdx_tDriftR_angWire[i + angBins/2][j-1] = (TH2D*)f4.Get(TString::Format("h_dQdx_tDriftR_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1],j));
+				h_dQdx_xDrift_angWire[i + angBins/2][j-1] = (TH2D*)f.Get(TString::Format("h_dQdx_xDrift_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1],j));
+				h_dQdx_tDriftL_angWire[i + angBins/2][j-1] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftL_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1],j));
+				h_dQdx_tDriftR_angWire[i + angBins/2][j-1] = (TH2D*)f.Get(TString::Format("h_dQdx_tDriftR_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1],j));
 
 			}
 
@@ -593,8 +590,8 @@ int main(int argc, char**argv) {
 
 		}
 
-		TFile f44((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
-		f44.cd();
+		TFile ff((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
+		ff.cd();
 
 		for(int i = 0; i < angBins/2; i++){
 

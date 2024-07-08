@@ -13,6 +13,7 @@ namespace constants {
 	Int_t powderBlue = TColor::GetColor("#9ADBE8");
 	Int_t flamingo = TColor::GetColor("#FF6371");
 	Int_t mintGreen = TColor::GetColor("#00CE7C");
+	double vDrift = 156.267;
 
 	std::map<int, std::string> configMap{{0, "classic"}, {1, "multiwire"}, {2, "multihit"}, {3, "angle"}, {4, "wireAndAngle"}};
 

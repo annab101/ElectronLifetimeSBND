@@ -56,6 +56,7 @@ int main(int argc, char**argv) {
     double expo_tDriftR_lb = 0.2;
     double expo_tDriftL_ub = 1.0;
     double expo_tDriftR_ub = 1.0;
+	std::string configLabel = "noConfigLabel";
 
 	p->getValue("inputData", inputData);
 	p->getValue("tag", tag);
@@ -72,19 +73,19 @@ int main(int argc, char**argv) {
 	p->getValue("expo_tDriftR_lb", expo_tDriftR_lb);
 	p->getValue("expo_tDriftL_ub", expo_tDriftL_ub);
 	p->getValue("expo_tDriftR_ub", expo_tDriftR_ub);
+	
+	configLabel = configMap[codeConfig];
 
-    std::string configLabel = configMap[codeConfig];
+	TFile f((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
+	TFile ff((saveLoc + dataset  + "_" + configLabel + "/MPVfit_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 
     if(codeConfig == 0){
 
-		TFile f0((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
+		TGraphErrors *MPVplot_xDrift_basic = (TGraphErrors*)f.Get("MPVplot_xDrift_basic");
+		TGraphErrors *MPVplot_tDriftL_basic = (TGraphErrors*)f.Get("MPVplot_tDriftL_basic");
+		TGraphErrors *MPVplot_tDriftR_basic = (TGraphErrors*)f.Get("MPVplot_tDriftR_basic");
 
-		TGraphErrors *MPVplot_xDrift_basic = (TGraphErrors*)f0.Get("MPVplot_xDrift_basic");
-		TGraphErrors *MPVplot_tDriftL_basic = (TGraphErrors*)f0.Get("MPVplot_tDriftL_basic");
-		TGraphErrors *MPVplot_tDriftR_basic = (TGraphErrors*)f0.Get("MPVplot_tDriftR_basic");
-
-		TFile f00((saveLoc + dataset  + "_" + configLabel + "/MPVfit_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
-		f00.cd();
+		ff.cd();
 
 		std::cout << "-----Initialising parameters-----" << std::endl;
 
@@ -140,9 +141,7 @@ int main(int argc, char**argv) {
 
     if(codeConfig == 1){
 
-		TFile f1((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-
-        fitExpoParameters expoParams_xDriftL;
+		fitExpoParameters expoParams_xDriftL;
 		fitExpoParameters expoParams_xDriftR;
 		fitExpoParameters expoParams_tDriftL;
 		fitExpoParameters expoParams_tDriftR;
@@ -152,14 +151,13 @@ int main(int argc, char**argv) {
 		TF1 *expoFit_tDriftL = new TF1();
 		TF1 *expoFit_tDriftR = new TF1();
 
-        TFile f11((saveLoc + dataset  + "_" + configLabel + "/MPVfit_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
-		f11.cd();
+        ff.cd();
         
         for(int i = 1; i <= maxWireGroup; i++){
 
-            TGraphErrors *MPVplot_xDrift_wires = (TGraphErrors*)f1.Get(TString::Format("MPVplot_xDrift_%dwires", i));
-            TGraphErrors *MPVplot_tDriftL_wires = (TGraphErrors*)f1.Get(TString::Format("MPVplot_tDriftL_%dwires", i));
-            TGraphErrors *MPVplot_tDriftR_wires = (TGraphErrors*)f1.Get(TString::Format("MPVplot_tDriftR_%dwires", i));
+            TGraphErrors *MPVplot_xDrift_wires = (TGraphErrors*)f.Get(TString::Format("MPVplot_xDrift_%dwires", i));
+            TGraphErrors *MPVplot_tDriftL_wires = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftL_%dwires", i));
+            TGraphErrors *MPVplot_tDriftR_wires = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftR_%dwires", i));
 
             expoParams_xDriftL.reset();
             expoParams_xDriftR.reset();
@@ -201,9 +199,7 @@ int main(int argc, char**argv) {
 
     if(codeConfig == 2){
 
-		TFile f2((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-
-        fitExpoParameters expoParams_xDriftL;
+		fitExpoParameters expoParams_xDriftL;
 		fitExpoParameters expoParams_xDriftR;
 		fitExpoParameters expoParams_tDriftL;
 		fitExpoParameters expoParams_tDriftR;
@@ -213,14 +209,13 @@ int main(int argc, char**argv) {
 		TF1 *expoFit_tDriftL = new TF1();
 		TF1 *expoFit_tDriftR = new TF1();
 
-        TFile f22((saveLoc + dataset  + "_" + configLabel + "/MPVfit_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
-		f22.cd();
+        ff.cd();
         
         for(int i = 1; i <= maxWireGroup; i++){
 
-            TGraphErrors *MPVplot_xDrift_hits = (TGraphErrors*)f2.Get(TString::Format("MPVplot_xDrift_%dhits", i));
-            TGraphErrors *MPVplot_tDriftL_hits = (TGraphErrors*)f2.Get(TString::Format("MPVplot_tDriftL_%dhits", i));
-            TGraphErrors *MPVplot_tDriftR_hits = (TGraphErrors*)f2.Get(TString::Format("MPVplot_tDriftR_%dhits", i));
+            TGraphErrors *MPVplot_xDrift_hits = (TGraphErrors*)f.Get(TString::Format("MPVplot_xDrift_%dhits", i));
+            TGraphErrors *MPVplot_tDriftL_hits = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftL_%dhits", i));
+            TGraphErrors *MPVplot_tDriftR_hits = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftR_%dhits", i));
 
             expoParams_xDriftL.reset();
             expoParams_xDriftR.reset();
@@ -262,9 +257,7 @@ int main(int argc, char**argv) {
 
     if(codeConfig == 3){
 
-		TFile f3((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-
-        fitExpoParameters expoParams_xDriftL_toW;
+		fitExpoParameters expoParams_xDriftL_toW;
 		fitExpoParameters expoParams_xDriftR_toW;
 		fitExpoParameters expoParams_tDriftL_toW;
 		fitExpoParameters expoParams_tDriftR_toW;
@@ -286,18 +279,17 @@ int main(int argc, char**argv) {
 
         double** angBinLimits = getAngBinLimits(angBins);
 
-        TFile f33((saveLoc + dataset  + "_" + configLabel + "/MPVfit_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
-		f33.cd();
+        ff.cd();
         
         for(int i = 0; i < angBins/2; i++){
 
-            TGraphErrors *MPVplot_xDrift_toW= (TGraphErrors*)f3.Get(TString::Format("MPVplot_xDrift_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
-            TGraphErrors *MPVplot_tDriftL_toW = (TGraphErrors*)f3.Get(TString::Format("MPVplot_tDriftL_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
-            TGraphErrors *MPVplot_tDriftR_toW = (TGraphErrors*)f3.Get(TString::Format("MPVplot_tDriftR_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
+            TGraphErrors *MPVplot_xDrift_toW= (TGraphErrors*)f.Get(TString::Format("MPVplot_xDrift_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
+            TGraphErrors *MPVplot_tDriftL_toW = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftL_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
+            TGraphErrors *MPVplot_tDriftR_toW = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftR_ang%ito%i", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1]));
 
-			TGraphErrors *MPVplot_xDrift_toE= (TGraphErrors*)f3.Get(TString::Format("MPVplot_xDrift_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1])); 
-			TGraphErrors *MPVplot_tDriftL_toE = (TGraphErrors*)f3.Get(TString::Format("MPVplot_tDriftL_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]));
-			TGraphErrors *MPVplot_tDriftR_toE = (TGraphErrors*)f3.Get(TString::Format("MPVplot_tDriftR_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]));
+			TGraphErrors *MPVplot_xDrift_toE= (TGraphErrors*)f.Get(TString::Format("MPVplot_xDrift_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1])); 
+			TGraphErrors *MPVplot_tDriftL_toE = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftL_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]));
+			TGraphErrors *MPVplot_tDriftR_toE = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftR_ang%ito%i", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1]));
 
             expoParams_xDriftL_toW.reset();
             expoParams_xDriftR_toW.reset();
@@ -373,9 +365,7 @@ int main(int argc, char**argv) {
 
     if(codeConfig == 4){
 
-		TFile f4((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-
-        fitExpoParameters expoParams_xDriftL_toW;
+		fitExpoParameters expoParams_xDriftL_toW;
 		fitExpoParameters expoParams_xDriftR_toW;
 		fitExpoParameters expoParams_tDriftL_toW;
 		fitExpoParameters expoParams_tDriftR_toW;
@@ -397,20 +387,19 @@ int main(int argc, char**argv) {
 
         double** angBinLimits = getAngBinLimits(angBins);
 
-        TFile f44((saveLoc + dataset  + "_" + configLabel + "/MPVfit_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
-		f44.cd();
+        ff.cd();
         
         for(int i = 0; i < angBins/2; i++){
 
 			for(int j = 1; j <= maxWireGroup; j++){
 
-				TGraphErrors *MPVplot_xDrift_toW = (TGraphErrors*)f4.Get(TString::Format("MPVplot_xDrift_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1], j));
-				TGraphErrors *MPVplot_tDriftL_toW = (TGraphErrors*)f4.Get(TString::Format("MPVplot_tDriftL_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1], j));
-				TGraphErrors *MPVplot_tDriftR_toW = (TGraphErrors*)f4.Get(TString::Format("MPVplot_tDriftR_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1], j));
+				TGraphErrors *MPVplot_xDrift_toW = (TGraphErrors*)f.Get(TString::Format("MPVplot_xDrift_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1], j));
+				TGraphErrors *MPVplot_tDriftL_toW = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftL_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1], j));
+				TGraphErrors *MPVplot_tDriftR_toW = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftR_ang%ito%inWires%d", (int)angBinLimits[0][i], (int)angBinLimits[0][i+1], j));
 
-				TGraphErrors *MPVplot_xDrift_toE = (TGraphErrors*)f4.Get(TString::Format("MPVplot_xDrift_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1], j)); 
-				TGraphErrors *MPVplot_tDriftL_toE = (TGraphErrors*)f4.Get(TString::Format("MPVplot_tDriftL_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1], j));
-				TGraphErrors *MPVplot_tDriftR_toE = (TGraphErrors*)f4.Get(TString::Format("MPVplot_tDriftR_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1], j));
+				TGraphErrors *MPVplot_xDrift_toE = (TGraphErrors*)f.Get(TString::Format("MPVplot_xDrift_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1], j)); 
+				TGraphErrors *MPVplot_tDriftL_toE = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftL_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1], j));
+				TGraphErrors *MPVplot_tDriftR_toE = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftR_ang%ito%inWires%d", (int)angBinLimits[1][i], (int)angBinLimits[1][i+1], j));
 
 				expoParams_xDriftL_toW.reset();
 				expoParams_xDriftR_toW.reset();

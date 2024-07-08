@@ -40,6 +40,7 @@ int main(int argc, char**argv) {
 	int codeConfig = 0;
 	int maxWireGroup = 20;
 	int angBins = 6;
+    std::string configLabel = "noConfigLabel";
 
 	p->getValue("inputData", inputData);
 	p->getValue("tag", tag);
@@ -49,7 +50,7 @@ int main(int argc, char**argv) {
 	p->getValue("maxWireGroup", maxWireGroup);
 	p->getValue("angBins", angBins);
     
-    std::string configLabel = configMap[codeConfig];
+    configLabel = configMap[codeConfig];
 
     if(codeConfig == 0 || codeConfig == 3){
 
@@ -191,7 +192,7 @@ int main(int argc, char**argv) {
 
         TFile f4((saveLoc + dataset  + "_" + configLabel + "/MPVfit_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
 
-        TFile f44((saveLoc + dataset  + "_" + configLabel + "/multihit_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
+        TFile f44((saveLoc + dataset  + "_" + configLabel + "/multiwire_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
         f44.cd();
 
         TGraphErrors *g_lifeVwires_angXL[2][angBins/2];

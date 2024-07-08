@@ -19,7 +19,6 @@ using namespace cppsecrets;
 
 int main(int argc, char**argv) {
 	
-	
 	std::string filename = "noFile";
     std::string histName = "noHist";
     int distOrTime = 0; //0 = distance, 1 = time
@@ -75,16 +74,17 @@ int main(int argc, char**argv) {
         c_plain->SetRightMargin(0.18);
         c_plain->SetBottomMargin(0.12);
 
-        setMarker<TGraphErrors>(MPVplot, kAzure - 3, 21, 0.6);
+        setMarker<TGraphErrors>(MPVplot, 1, 20, 0.7);
 		MPVplot->SetTitle(";x (cm);dQ/dx MPV (ADC/cm)");
 		MPVplot->GetXaxis()->SetNdivisions(505);
+		MPVplot->SetMinimum(930);
 		setFontSize<TGraphErrors>(MPVplot, 133, 25);
 		MPVplot->Draw("AP");
 		expoFitL->SetLineColor(coral);
-		expoFitL->SetLineWidth(2.3);
+		expoFitL->SetLineWidth(4.0);
 		expoFitL->Draw("SAME");
-		expoFitR->SetLineColor(deepViolet);
-		expoFitR->SetLineWidth(2.3);
+		expoFitR->SetLineColor(kAzure - 3);
+		expoFitR->SetLineWidth(4.0);
 		expoFitR->Draw("SAME");
 		TPaveText *stats = statsBox({.34,.62,.63,.88}, track_count, expoFitL, expoFitR);
 		stats->Draw();
@@ -105,19 +105,25 @@ int main(int argc, char**argv) {
         TPad *pad1 = new TPad("pad1", "", 0, 0, 0.5, 1.0);
         TPad *pad2 = new TPad("pad2", "", 0.5, 0, 1.0, 1.0);
         c_split->cd();
-        pad1->SetRightMargin(0.20);
+        pad1->SetRightMargin(0.1);
         pad1->SetLeftMargin(0.18);
         pad2->SetRightMargin(0.20);
         pad2->SetLeftMargin(0.18);
 
-        setMarker<TGraphErrors>(MPVplotL, kAzure - 3, 21, 0.6);
-		MPVplotL->SetTitle("dQ/dx MPV vs t Left TPC;t (ms); dQ/dx MPV (ADC/cm)");
+        setMarker<TGraphErrors>(MPVplotL, 1, 20, 0.7);
+		MPVplotL->SetMinimum(940);
+		MPVplotL->SetMaximum(1080);
+		MPVplotL->SetTitle("East TPC;t (ms); dQ/dx MPV (ADC/cm)");
 		expoFitL->SetLineColor(coral);
+		expoFitL->SetLineWidth(4.0);
 		setFontSize<TGraphErrors>(MPVplotL, 133, 25);
 		TPaveText *statsL = statsBox({.45,.65,.80,.88}, track_count, expoFitL);
-		setMarker<TGraphErrors>(MPVplotR, kAzure - 3, 21, 0.5);
-		MPVplotR->SetTitle("dQ/dx MPV vs t Right TPC;t (ms); dQ/dx MPV (ADC/cm)");
-		expoFitR->SetLineColor(deepViolet);
+		setMarker<TGraphErrors>(MPVplotR, 1, 20, 0.7);
+		MPVplotR->SetMinimum(940);
+		MPVplotR->SetMaximum(1080);
+		MPVplotR->SetTitle("West TPC;t (ms); dQ/dx MPV (ADC/cm)");
+		expoFitR->SetLineColor(kAzure - 3);
+		expoFitR->SetLineWidth(4.0);
 		setFontSize<TGraphErrors>(MPVplotR, 133, 25);
 		TPaveText *statsR = statsBox({.45,.65,.80,.88}, track_count, expoFitR);
 		

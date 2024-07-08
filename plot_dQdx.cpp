@@ -19,7 +19,6 @@ using namespace cppsecrets;
 
 int main(int argc, char**argv) {
 	
-	
 	std::string filename = "noFile";
     std::string histName = "noHist";
     int distOrTime = 0; //0 = distance, 1 = time
