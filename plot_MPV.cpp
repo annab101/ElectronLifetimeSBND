@@ -22,6 +22,7 @@ int main(int argc, char**argv) {
 	std::string filename = "noFile";
     std::string histName = "noHist";
     int distOrTime = 0; //0 = distance, 1 = time
+	int plotFit = 0;
 
 	for(int i=0; i<argc; ++i){
 		if(!strcmp(argv[i], "--config")){
@@ -32,6 +33,9 @@ int main(int argc, char**argv) {
 		}
         if(!strcmp(argv[i], "--distOrTime")){
 			distOrTime = std::stoi(argv[i+1]);
+		}
+		if(!strcmp(argv[i], "--plotFit")){
+			plotFit = std::stoi(argv[i+1]);
 		}
 	}
 
@@ -77,17 +81,17 @@ int main(int argc, char**argv) {
         setMarker<TGraphErrors>(MPVplot, 1, 20, 0.7);
 		MPVplot->SetTitle(";x (cm);dQ/dx MPV (ADC/cm)");
 		MPVplot->GetXaxis()->SetNdivisions(505);
-		MPVplot->SetMinimum(930);
 		setFontSize<TGraphErrors>(MPVplot, 133, 25);
 		MPVplot->Draw("AP");
 		expoFitL->SetLineColor(coral);
 		expoFitL->SetLineWidth(4.0);
-		expoFitL->Draw("SAME");
+		if(plotFit){expoFitL->Draw("SAME");}
 		expoFitR->SetLineColor(kAzure - 3);
 		expoFitR->SetLineWidth(4.0);
-		expoFitR->Draw("SAME");
-		TPaveText *stats = statsBox({.34,.62,.63,.88}, track_count, expoFitL, expoFitR);
-		stats->Draw();
+		if(plotFit){expoFitR->Draw("SAME");}
+		if(plotFit){TPaveText *stats = statsBox({.34,.62,.63,.88}, track_count, expoFitL, expoFitR);stats->Draw();}
+		//if(!plotFit){TPaveText *stats = statsBox({.34,.8,.63,.88}, track_count);stats->Draw();}
+		//TPaveText *stats = statsBox({.2,.2,.49,.46}, track_count, expoFitL, expoFitR);
 
 		saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_xDrift_" + histName + tag);
 
@@ -105,40 +109,36 @@ int main(int argc, char**argv) {
         TPad *pad1 = new TPad("pad1", "", 0, 0, 0.5, 1.0);
         TPad *pad2 = new TPad("pad2", "", 0.5, 0, 1.0, 1.0);
         c_split->cd();
-        pad1->SetRightMargin(0.1);
+        pad1->SetRightMargin(0.15);
         pad1->SetLeftMargin(0.18);
-        pad2->SetRightMargin(0.20);
+        pad2->SetRightMargin(0.15);
         pad2->SetLeftMargin(0.18);
 
         setMarker<TGraphErrors>(MPVplotL, 1, 20, 0.7);
-		MPVplotL->SetMinimum(940);
-		MPVplotL->SetMaximum(1080);
 		MPVplotL->SetTitle("East TPC;t (ms); dQ/dx MPV (ADC/cm)");
 		expoFitL->SetLineColor(coral);
 		expoFitL->SetLineWidth(4.0);
 		setFontSize<TGraphErrors>(MPVplotL, 133, 25);
-		TPaveText *statsL = statsBox({.45,.65,.80,.88}, track_count, expoFitL);
 		setMarker<TGraphErrors>(MPVplotR, 1, 20, 0.7);
-		MPVplotR->SetMinimum(940);
-		MPVplotR->SetMaximum(1080);
 		MPVplotR->SetTitle("West TPC;t (ms); dQ/dx MPV (ADC/cm)");
 		expoFitR->SetLineColor(kAzure - 3);
 		expoFitR->SetLineWidth(4.0);
 		setFontSize<TGraphErrors>(MPVplotR, 133, 25);
-		TPaveText *statsR = statsBox({.45,.65,.80,.88}, track_count, expoFitR);
 		
 		c_split->cd();		
 		pad1->Draw();		
 		pad1->cd();	
 		MPVplotL->Draw("AP");	
-		expoFitL->Draw("SAME");
-		statsL->Draw();
+		if(plotFit){expoFitL->Draw("SAME");}
+		if(plotFit){TPaveText *statsL = statsBox({.45,.65,.80,.88}, track_count, expoFitL);statsL->Draw();}
+		//if(!plotFit){TPaveText *statsL = statsBox({.45,.82,.80,.88}, track_count);statsL->Draw();}
 		c_split->cd();
 		pad2->Draw();
 		pad2->cd();
 		MPVplotR->Draw("AP");
-		expoFitR->Draw("SAME");
-		statsR->Draw();
+		if(plotFit){expoFitR->Draw("SAME");}
+		if(plotFit){TPaveText *statsR = statsBox({.45,.65,.80,.88}, track_count, expoFitR);statsR->Draw();}
+		//if(!plotFit){TPaveText *statsR = statsBox({.45,.82,.80,.88}, track_count);statsR->Draw();}
         saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_tDrift_" + histName + tag);
 
     }
