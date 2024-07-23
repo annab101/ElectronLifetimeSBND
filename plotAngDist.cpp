@@ -98,6 +98,7 @@ int main(int argc, char**argv) {
 	TTreeReaderValue<Float_t> read_xf(treereader, "trk.end.x");
 	TTreeReaderValue<Float_t> read_yf(treereader, "trk.end.y");
 	TTreeReaderValue<Float_t> read_zf(treereader, "trk.end.z");
+	TTreeReaderValue<int> read_selected(treereader, "trk.selected");
 	
     //variables of interest
     std::vector<double> xi;
@@ -113,7 +114,7 @@ int main(int argc, char**argv) {
 		treereader.Restart();
 		while(treereader.Next()){
 					
-            if(*read_xi < -199. || *read_xi > 199. || *read_xf < -199. || *read_xf > 199.){ //AC crosser filter
+            if(*read_selected == 1){ //AC crosser filter
                 weights.push_back(1.);
                 xi.push_back(*read_xi);
                 yi.push_back(*read_yi);
@@ -125,7 +126,7 @@ int main(int argc, char**argv) {
 			
         }	
 
-		std::cout << "AC track count 2: " << xi.size() << std::endl;
+		std::cout << "AC track count: " << xi.size() << std::endl;
 		
 		//Initialise vectors for angle calculations
 		std::vector<double> tanAzimuth;
