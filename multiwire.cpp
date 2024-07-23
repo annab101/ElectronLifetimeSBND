@@ -10,6 +10,8 @@
 #include "Helpers/Constants.h"
 #include "Helpers/PlottingHelpers.h"
 #include "Helpers/PlottingHelpers.cpp"
+#include "Helpers/FittingHelpers.h"
+#include "Helpers/FittingHelpers.cpp"
 #include "Utilities/ConfigReader.h"
 #include "Utilities/ConfigReader.cpp"
 
@@ -241,10 +243,10 @@ int main(int argc, char**argv) {
 
                 }
 
-                g_lifeVwires_angXL[j][k]->SetTitle("x, left TPC, %i#circ to %i#circ", (int)angBinLimits[j][k], (int)angBinLimits[j][k+1]);
-                g_lifeVwires_angXR[j][k]->SetTitle("x, right TPC, %i#circ to %i#circ", (int)angBinLimits[j][k], (int)angBinLimits[j][k+1]);
-                g_lifeVwires_angTL[j][k]->SetTitle("t, left TPC, %i#circ to %i#circ", (int)angBinLimits[j][k], (int)angBinLimits[j][k+1]);
-                g_lifeVwires_angTR[j][k]->SetTitle("t, right TPC, %i#circ to %i#circ", (int)angBinLimits[j][k], (int)angBinLimits[j][k+1]);
+                g_lifeVwires_angXL[j][k]->SetTitle(TString::Format("x, left TPC, %i#circ to %i#circ", (int)angBinLimits[j][k], (int)angBinLimits[j][k+1]));
+                g_lifeVwires_angXR[j][k]->SetTitle(TString::Format("x, right TPC, %i#circ to %i#circ", (int)angBinLimits[j][k], (int)angBinLimits[j][k+1]));
+                g_lifeVwires_angTL[j][k]->SetTitle(TString::Format("t, left TPC, %i#circ to %i#circ", (int)angBinLimits[j][k], (int)angBinLimits[j][k+1]));
+                g_lifeVwires_angTR[j][k]->SetTitle(TString::Format("t, right TPC, %i#circ to %i#circ", (int)angBinLimits[j][k], (int)angBinLimits[j][k+1]));
 
             }
 
