@@ -1,6 +1,6 @@
-inputData = /pnfs/sbnd/scratch/users/abeever/EWCosmicNoSCEnoDiff/corsika_prodTest_noSCEnodiff/genToRecoFull/filesanaReco2.list
-codeConfig = 4
-tag = v09_84_00_01
+inputData = /pnfs/sbnd/scratch/users/abeever/lifetime_data/calorimetry/run14432/ana/filesanaReco.list
+codeConfig = 0
+tag = v09_90_00_data
 NBinsX = 100
 NBinsT = 100
 minX = -200.
@@ -18,8 +18,7 @@ expo_tDriftL_lb = 0.2
 expo_tDriftR_lb = 0.2
 expo_tDriftL_ub = 1.0
 expo_tDriftR_ub = 1.0
-angBins = 6
 writeProjY = 0
 
-dataset = noSCEnoDiff
+dataset = run14432
 saveLoc = /exp/sbnd/data/users/abeever/cosmics_analysis/Lifetime/

@@ -1,5 +1,5 @@
-inputData = /pnfs/sbnd/scratch/users/abeever/EWCosmicNoSCEnoDiff/corsika_prodTest_noSCEnodiff/genToRecoFull/filesanaReco2.list
-codeConfig = 4
+inputData = /exp/sbnd/data/users/abeever/lifetime_data/grid/test/files.list
+codeConfig = 0
 tag = v09_84_00_01
 NBinsX = 100
 NBinsT = 100
@@ -18,8 +18,7 @@ expo_tDriftL_lb = 0.2
 expo_tDriftR_lb = 0.2
 expo_tDriftL_ub = 1.0
 expo_tDriftR_ub = 1.0
-angBins = 6
 writeProjY = 0
 
-dataset = noSCEnoDiff
+dataset = dataTest
 saveLoc = /exp/sbnd/data/users/abeever/cosmics_analysis/Lifetime/

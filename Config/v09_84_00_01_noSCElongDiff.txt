@@ -1,5 +1,5 @@
-inputData = /pnfs/sbnd/persistent/users/abeever/production/lifetime_variations/noSCElongDiff/filesanaReco2.list
-codeConfig = 0
+inputData = /pnfs/sbnd/scratch/users/abeever/EWCosmicNoSCElongDiff/corsika_prodTest_noSCElongDiff/genToReco/filesanaReco2.list
+codeConfig = 1
 tag = v09_84_00_01
 NBinsX = 100
 NBinsT = 100
