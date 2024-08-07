@@ -46,13 +46,16 @@ int main(int argc, char**argv) {
 	std::string dataset = "noDataSet";
 	std::string saveLoc = "noSaveLoc";
 	
-	//codeConfig (0 = lifetime, 1 = lifetime with wires grouped, 2 = lifetime with hits grouped, 3 = angular bins, 4 = wires and angular bins)
+	//codeConfig (0 = lifetime, 1 = lifetime with wires grouped, 2 = lifetime with hits grouped, 3 = angular bins, 4 = wires and angular bins, 5 = octants)
+	int choppyLim = -1;
 	int codeConfig = 0;
 	int maxWireGroup = 20;
 	int NBinsX = 100;
 	int NBinsT = 100;
+	int NBinsHalfX = 50;
 	int NBinsdQdx = 75;
 	double minX = -200.;
+	double halfX = 0.;
 	double maxX = 200.;
 	double mindQdx = 200.;
 	double maxdQdx = 1800.;
@@ -65,12 +68,15 @@ int main(int argc, char**argv) {
 	p->getValue("tag", tag);
 	p->getValue("dataset", dataset);
 	p->getValue("saveLoc", saveLoc);
+	p->getValue("choppyLim", choppyLim);
 	p->getValue("codeConfig", codeConfig);
 	p->getValue("maxWireGroup", maxWireGroup);
 	p->getValue("NBinsX", NBinsX);
 	p->getValue("NBinsT", NBinsT);
+	p->getValue("NBinsHalfX", NBinsHalfX);
 	p->getValue("NBinsdQdx", NBinsdQdx);
 	p->getValue("minX", minX);
+	p->getValue("halfX", halfX);
 	p->getValue("maxX", maxX);
 	p->getValue("mindQdx", mindQdx);
 	p->getValue("maxdQdx", maxdQdx);
@@ -109,6 +115,7 @@ int main(int argc, char**argv) {
 	TTreeReaderValue<Float_t> read_xf(treereader, "trk.end.x");
 	TTreeReaderValue<Float_t> read_yf(treereader, "trk.end.y");
 	TTreeReaderValue<Float_t> read_zf(treereader, "trk.end.z");
+	TTreeReaderValue<int> read_event(treereader, "trk.meta.evt");
 	TTreeReaderValue<int> read_selected(treereader, "trk.selected");
 	TTreeReaderArray<uint16_t> read_wire(treereader, "trk.hits2.h.wire");
 
@@ -117,7 +124,7 @@ int main(int argc, char**argv) {
 	TFile f((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 
 	int track_count = 0;
-	TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 1, 0, 2);
+	TH1D* h_stats = new TH1D("h_stats", "Number of tracks", 9, 0, 9);
 
 	if(codeConfig == 0){
 
@@ -128,7 +135,7 @@ int main(int argc, char**argv) {
 		treereader.Restart();
 		while(treereader.Next()){
 
-			if(*read_selected != 1){
+			if(*read_selected != 1 || (choppyLim > 0 && *read_event >= choppyLim) ){
 				continue;
 			}
 
@@ -188,7 +195,7 @@ int main(int argc, char**argv) {
 		treereader.Restart();
 		while(treereader.Next()){
 
-			if(*read_selected != 1){
+			if(*read_selected != 1 || (choppyLim > 0 && *read_event >= choppyLim) ){
 				continue;
 			}
 
@@ -333,7 +340,7 @@ int main(int argc, char**argv) {
 		treereader.Restart();
 		while(treereader.Next()){
 
-			if(*read_selected != 1){
+			if(*read_selected != 1 || (choppyLim > 0 && *read_event >= choppyLim) ){
 				continue;
 			}
 
@@ -479,7 +486,7 @@ int main(int argc, char**argv) {
 		treereader.Restart();
 		while(treereader.Next()){
 
-			if(*read_selected != 1){
+			if(*read_selected != 1 || (choppyLim > 0 && *read_event >= choppyLim) ){
 				continue;
 			}
 
@@ -578,7 +585,7 @@ int main(int argc, char**argv) {
 		treereader.Restart();
 		while(treereader.Next()){
 
-			if(*read_selected != 1){
+			if(*read_selected != 1 || (choppyLim > 0 && *read_event >= choppyLim) ){
 				continue;
 			}
 
@@ -726,6 +733,126 @@ int main(int argc, char**argv) {
 				h_dQdx_tDriftR_angWire[i][j-1]->Write();
 
 			}
+
+		}
+
+		h_stats->Write();
+
+		f.Close();
+
+	}
+
+	if(codeConfig == 5){
+
+		TH2D** h_dQdx_xDriftL_oct = new TH2D*[4];
+		TH2D** h_dQdx_xDriftR_oct = new TH2D*[4];
+		TH2D** h_dQdx_tDriftL_oct = new TH2D*[4];
+		TH2D** h_dQdx_tDriftR_oct = new TH2D*[4];
+
+		for(int i = 1; i <= 4; i++){
+			
+			h_dQdx_xDriftL_oct[i-1] = new TH2D(TString::Format("h_dQdx_xDriftL_oct%i", 2*i),"dQ/dx vs x", NBinsHalfX, minX, halfX, NBinsdQdx, mindQdx, maxdQdx);
+			h_dQdx_xDriftR_oct[i-1] = new TH2D(TString::Format("h_dQdx_xDriftR_oct%i", (2*i)-1),"dQ/dx vs x", NBinsHalfX, halfX, maxX, NBinsdQdx, mindQdx, maxdQdx);
+			h_dQdx_tDriftL_oct[i-1] = new TH2D(TString::Format("h_dQdx_tDriftL_oct%i", 2*i),"dQ/dx vs t Left TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+			h_dQdx_tDriftR_oct[i-1] = new TH2D(TString::Format("h_dQdx_tDriftR_oct%i", (2*i)-1),"dQ/dx vs t Right TPC", NBinsT, minT, maxT, NBinsdQdx, mindQdx, maxdQdx);
+
+		}
+
+		treereader.Restart();
+		while(treereader.Next()){
+
+			if(*read_selected != 1 || (choppyLim > 0 && *read_event >= choppyLim) ){
+				continue;
+			}
+
+			if(track_count % 100 == 0){std::cout << "track_count: " << track_count << std::endl;}
+			track_count ++;	
+			h_stats->Fill(1.);
+			
+			auto it_start_x = std::find_if(read_x.begin(), read_x.end(), [](float f){return !std::isnan(f);});
+			int start_index = std::distance(read_x.begin(), it_start_x);
+
+			if(start_index == read_x.GetSize()){continue;}
+			auto it_end_x = std::find_if(it_start_x, read_x.end(), [](float f){return std::isnan(f);}) - 1;
+			int end_index = std::distance(read_x.begin(), it_end_x);
+			if(end_index < 0){continue;}
+
+			for(int i = start_index; i <= end_index; i++){
+
+				//Octant 1, 0 < x < 200, 0 < y < 200, 250 < z < 500
+				if(0. < read_x[i] && read_x[i] < 200. && 0. < read_y[i] && read_y[i] < 200. && 250. < read_z[i] && read_z[i] < 500.){
+					
+					h_dQdx_xDriftR_oct[0]->Fill(read_x[i], read_dqdx[i]);
+					h_dQdx_tDriftR_oct[0]->Fill(read_T[i]/2000 - 0.2 - *read_t0/1000000, read_dqdx[i]);
+
+				}
+
+				//Octant 2, -200 < x < 0, 0 < y < 200, 250 < z < 500
+				if(-200. < read_x[i] && read_x[i] < 0. && 0. < read_y[i] && read_y[i] < 200. && 250. < read_z[i] && read_z[i] < 500.){
+					
+					h_dQdx_xDriftL_oct[0]->Fill(read_x[i], read_dqdx[i]);
+					h_dQdx_tDriftL_oct[0]->Fill(read_T[i]/2000 - 0.2 - *read_t0/1000000, read_dqdx[i]);
+
+				}
+
+				//Octant 3, 0 < x < 200, 0 < y < 200, 0 < z < 250
+				if(0. < read_x[i] && read_x[i] < 200. && 0. < read_y[i] && read_y[i] < 200. && 0. < read_z[i] && read_z[i] < 250.){
+					
+					h_dQdx_xDriftR_oct[1]->Fill(read_x[i], read_dqdx[i]);
+					h_dQdx_tDriftR_oct[1]->Fill(read_T[i]/2000 - 0.2 - *read_t0/1000000, read_dqdx[i]);
+
+				}
+
+				//Octant 4, -200 < x < 0, 0 < y < 200, 0 < z < 250
+				if(-200. < read_x[i] && read_x[i] < 0. && 0. < read_y[i] && read_y[i] < 200. && 0. < read_z[i] && read_z[i] < 250.){
+					
+					h_dQdx_xDriftL_oct[1]->Fill(read_x[i], read_dqdx[i]);
+					h_dQdx_tDriftL_oct[1]->Fill(read_T[i]/2000 - 0.2 - *read_t0/1000000, read_dqdx[i]);
+
+				}
+
+				//Octant 5, 0 < x < 200, -200 < y < -0, 250 < z < 500
+				if(0. < read_x[i] && read_x[i] < 200. && -200. < read_y[i] && read_y[i] < 0. && 250. < read_z[i] && read_z[i] < 500.){
+					
+					h_dQdx_xDriftR_oct[2]->Fill(read_x[i], read_dqdx[i]);
+					h_dQdx_tDriftR_oct[2]->Fill(read_T[i]/2000 - 0.2 - *read_t0/1000000, read_dqdx[i]);
+
+				}
+
+				//Octant 6, -200 < x < 0, -200 < y < 0, 250 < z < 500
+				if(-200. < read_x[i] && read_x[i] < 0. && -200. < read_y[i] && read_y[i] < 0. && 250. < read_z[i] && read_z[i] < 500.){
+					
+					h_dQdx_xDriftL_oct[2]->Fill(read_x[i], read_dqdx[i]);
+					h_dQdx_tDriftL_oct[2]->Fill(read_T[i]/2000 - 0.2 - *read_t0/1000000, read_dqdx[i]);
+
+				}
+
+				//Octant 7, 0 < x < 200, -200 < y < 0, 0 < z < 250
+				if(0. < read_x[i] && read_x[i] < 200. && -200. < read_y[i] && read_y[i] < 0. && 0. < read_z[i] && read_z[i] < 250.){
+					
+					h_dQdx_xDriftR_oct[3]->Fill(read_x[i], read_dqdx[i]);
+					h_dQdx_tDriftR_oct[3]->Fill(read_T[i]/2000 - 0.2 - *read_t0/1000000, read_dqdx[i]);
+
+				}
+
+				//Octant 8, -200 < x < 0, -200 < y < 0, 0 < z < 250
+				if(-200. < read_x[i] && read_x[i] < 0. && -200. < read_y[i] && read_y[i] < 0. && 0. < read_z[i] && read_z[i] < 250.){
+					
+					h_dQdx_xDriftL_oct[3]->Fill(read_x[i], read_dqdx[i]);
+					h_dQdx_tDriftL_oct[3]->Fill(read_T[i]/2000 - 0.2 - *read_t0/1000000, read_dqdx[i]);
+
+				}
+
+			}
+
+		}
+
+		for(int i = 1; i <= 4; i++){
+
+			h_dQdx_xDriftL_oct[i-1]->Write();
+			h_dQdx_xDriftR_oct[i-1]->Write();
+			h_dQdx_tDriftL_oct[i-1]->Write();
+			h_dQdx_tDriftR_oct[i-1]->Write();
 
 		}
 
