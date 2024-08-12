@@ -61,19 +61,19 @@ int main(int argc, char**argv) {
 
     std::cout << configLabel << std::endl;
     
-	TFile f_stats((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
+	TFile f_hist((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
     TFile f_MPV((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
 
-	TH2D* h_stats = (TH2D*)f_stats.Get("h_stats");
+	TH2D* h = (TH2D*)f_hist.Get(("h_dQdx_xDrift_" + histName).c_str());
     TH1D* projY = (TH1D*)f_MPV.Get(("projY_xDrift_" + histName + "_bin" + std::to_string(binNum)).c_str());
 	TF1* LGfit = (TF1*)f_MPV.Get(("LGfit_xDrift_" + histName + "_bin" + std::to_string(binNum)).c_str());
 
 	std::string projYtitle;
 	std::stringstream s1;
-	s1 << std::setprecision(4) << h_stats->GetXaxis()->GetBinLowEdge(binNum);
+	s1 << std::setprecision(4) << h->GetXaxis()->GetBinLowEdge(binNum);
 	std::string str1 = s1.str();
 	std::stringstream s2;
-	s2 << std::setprecision(4) << (h_stats->GetXaxis()->GetBinLowEdge(binNum) + h_stats->GetXaxis()->GetBinWidth(binNum));
+	s2 << std::setprecision(4) << (h->GetXaxis()->GetBinLowEdge(binNum) + h->GetXaxis()->GetBinWidth(binNum));
 	std::string str2 = s2.str();
 	projYtitle = "dQ/dx for " + str1 + " cm < x < " + str2 + " cm;dQ/dx (ADC/cm);Entries";
 	projY->SetTitle(projYtitle.c_str());
@@ -82,9 +82,18 @@ int main(int argc, char**argv) {
 
 	projY->GetXaxis()->SetLabelOffset(0.01);
 	projY->GetXaxis()->SetNdivisions(505);
+	if(col){
+		projY->GetXaxis()->SetAxisColor(deepViolet);
+		projY->GetXaxis()->SetLabelColor(deepViolet);
+		projY->GetXaxis()->SetTitleColor(deepViolet);
+	}
 	setFontSize<TH1>(projY, 133, 25);
 	projY->GetYaxis()->SetLabelOffset(0.01);
-
+	if(col){
+		projY->GetYaxis()->SetAxisColor(deepViolet);
+		projY->GetYaxis()->SetLabelColor(deepViolet);
+		projY->GetYaxis()->SetTitleColor(deepViolet);
+	}
 	projY->SetFillColor(flamingo);
 	projY->SetLineColor(flamingo);
 	projY->SetStats(0);
@@ -94,22 +103,25 @@ int main(int argc, char**argv) {
 	TCanvas *c_plain = new TCanvas();
 	c_plain->SetLeftMargin(0.15);
 	c_plain->SetBottomMargin(0.12);
+	if(col){
+		c_plain->SetFillColor(powderBlue);
+		c_plain->SetFillStyle(1001);
+		c_plain->SetFrameLineColor(deepViolet);
+	}
 	projY->Draw();
 	LGfit->Draw("same");
-	saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_projY_" + histName + tag);
+	saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_projY_xDrift_" + histName + tag + "_bin" + std::to_string(binNum));
 
-	//Cheating for now
-	fitLGParameters fp_xDrift;
-	SetLGParameters(projY, fp_xDrift.fp, fp_xDrift.efp, fp_xDrift.lb, fp_xDrift.ub);
-	LGfit = fitter(projY, fp_xDrift.lb, fp_xDrift.ub, fp_xDrift.fp, fp_xDrift.efp, fp_xDrift.cov, "LG");
-	std::cout << "MPV: " << fp_xDrift.fp[1] << std::endl;
-	std::cout << "eMPV: " << pointError(projY, fp_xDrift) << std::endl;
-	std::cout << "scale: " << fp_xDrift.fp[0] << std::endl;
-	std::cout << "escale: " << fp_xDrift.efp[0] << std::endl;
-	std::cout << "norm: " << fp_xDrift.fp[2] << std::endl;
-	std::cout << "enorm: " << fp_xDrift.efp[2] << std::endl;
-	std::cout << "sigma: " << fp_xDrift.fp[3] << std::endl;
-	std::cout << "esigma: " << fp_xDrift.efp[3] << std::endl;
+	std::cout << "MPV: " << LGfit->GetParameter(1) << std::endl;
+	std::cout << "eMPV: " << LGfit->GetParError(1) << std::endl;
+	std::cout << "scale: " << LGfit->GetParameter(0) << std::endl;
+	std::cout << "escale: " << LGfit->GetParError(0) << std::endl;
+	std::cout << "norm: " << LGfit->GetParameter(2) << std::endl;
+	std::cout << "enorm: " << LGfit->GetParError(2) << std::endl;
+	std::cout << "sigma: " << LGfit->GetParameter(3) << std::endl;
+	std::cout << "esigma: " << LGfit->GetParError(3) << std::endl;
+	std::cout << "chisq: " << LGfit->GetChisquare() << std::endl;
+	std::cout << "NDoF: " << LGfit->GetNDF() << std::endl;
 
     return 0;
 
