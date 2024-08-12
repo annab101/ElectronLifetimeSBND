@@ -475,6 +475,66 @@ int main(int argc, char**argv) {
 
 	}
 
+	if(codeConfig == 5){
+
+		fitExpoParameters expoParams_xDriftL;
+		fitExpoParameters expoParams_xDriftR;
+		fitExpoParameters expoParams_tDriftL;
+		fitExpoParameters expoParams_tDriftR;
+
+		TF1 *expoFit_xDriftL = new TF1();
+		TF1 *expoFit_xDriftR = new TF1();
+		TF1 *expoFit_tDriftL = new TF1();
+		TF1 *expoFit_tDriftR = new TF1();
+
+		ff.cd();
+        
+        for(int i = 1; i <= 4; i++){
+
+            TGraphErrors *MPVplot_xDriftL = (TGraphErrors*)f.Get(TString::Format("MPVplot_xDriftL_oct%i",2*i));
+			TGraphErrors *MPVplot_xDriftR = (TGraphErrors*)f.Get(TString::Format("MPVplot_xDriftR_oct%i",(2*i)-1));
+			TGraphErrors *MPVplot_tDriftL = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftL_oct%i",2*i));
+            TGraphErrors *MPVplot_tDriftR = (TGraphErrors*)f.Get(TString::Format("MPVplot_tDriftR_oct%i",(2*i)-1));
+            
+			expoParams_xDriftL.reset();
+            expoParams_xDriftR.reset();
+			expoParams_tDriftL.reset();
+            expoParams_tDriftR.reset();
+            
+			SetExpoParameters(expoParams_xDriftL.fp);
+            SetExpoParameters(expoParams_xDriftR.fp);
+			SetExpoParameters(expoParams_tDriftL.fp);
+            SetExpoParameters(expoParams_tDriftR.fp);
+            
+			expoParams_xDriftL.lb = expo_xDriftL_lb;
+            expoParams_xDriftL.ub = expo_xDriftL_ub;
+            expoParams_xDriftR.lb = expo_xDriftR_lb;
+            expoParams_xDriftR.ub = expo_xDriftR_ub;
+			expoParams_tDriftL.lb = expo_tDriftL_lb;
+            expoParams_tDriftL.ub = expo_tDriftL_ub;
+            expoParams_tDriftR.lb = expo_tDriftR_lb;
+            expoParams_tDriftR.ub = expo_tDriftR_ub;
+            
+			expoFit_xDriftL = fitter(MPVplot_xDriftL, expoParams_xDriftL.lb, expoParams_xDriftL.ub, expoParams_xDriftL.fp, expoParams_xDriftL.efp, expoParams_xDriftL.cov, "expoX");
+			expoFit_xDriftR = fitter(MPVplot_xDriftR, expoParams_xDriftR.lb, expoParams_xDriftR.ub, expoParams_xDriftR.fp, expoParams_xDriftR.efp, expoParams_xDriftR.cov, "expoX");
+			expoFit_tDriftL = fitter(MPVplot_tDriftL, expoParams_tDriftL.lb, expoParams_tDriftL.ub, expoParams_tDriftL.fp, expoParams_tDriftL.efp, expoParams_tDriftL.cov, "expoT");
+			expoFit_tDriftR = fitter(MPVplot_tDriftR, expoParams_tDriftR.lb, expoParams_tDriftR.ub, expoParams_tDriftR.fp, expoParams_tDriftR.efp, expoParams_tDriftR.cov, "expoT");
+
+			
+			expoFit_xDriftL->SetName(TString::Format("MPVfit_xDriftL_oct%i",2*i));
+            expoFit_xDriftR->SetName(TString::Format("MPVfit_xDriftR_oct%i",(2*i)-1));
+			expoFit_tDriftL->SetName(TString::Format("MPVfit_tDriftL_oct%i",2*i));
+            expoFit_tDriftR->SetName(TString::Format("MPVfit_tDriftR_oct%i",(2*i)-1));
+            
+			expoFit_xDriftL->Write();
+            expoFit_xDriftR->Write();
+			expoFit_tDriftL->Write();
+            expoFit_tDriftR->Write();
+            
+        }
+
+	}
+
 	return 0;
 
 }
