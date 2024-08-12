@@ -23,6 +23,9 @@ int main(int argc, char**argv) {
     std::string histName = "noHist";
     int distOrTime = 0; //0 = distance, 1 = time
 	int plotFit = 0;
+	int plotStats = 0;
+	int MPVmin = 940;
+	int MPVmax = 1060;
 
 	for(int i=0; i<argc; ++i){
 		if(!strcmp(argv[i], "--config")){
@@ -36,6 +39,15 @@ int main(int argc, char**argv) {
 		}
 		if(!strcmp(argv[i], "--plotFit")){
 			plotFit = std::stoi(argv[i+1]);
+		}
+		if(!strcmp(argv[i], "--plotStats")){
+			plotStats = std::stoi(argv[i+1]);
+		}
+		if(!strcmp(argv[i], "--MPVmin")){
+			MPVmin = std::stoi(argv[i+1]);
+		}
+		if(!strcmp(argv[i], "--MPVmax")){
+			MPVmax = std::stoi(argv[i+1]);
 		}
 	}
 
@@ -80,6 +92,8 @@ int main(int argc, char**argv) {
 
         setMarker<TGraphErrors>(MPVplot, 1, 20, 0.7);
 		MPVplot->SetTitle(";x (cm);dQ/dx MPV (ADC/cm)");
+		MPVplot->SetMinimum(MPVmin);
+    	MPVplot->SetMaximum(MPVmax);
 		MPVplot->GetXaxis()->SetNdivisions(505);
 		setFontSize<TGraphErrors>(MPVplot, 133, 25);
 		MPVplot->Draw("AP");
@@ -89,11 +103,12 @@ int main(int argc, char**argv) {
 		expoFitR->SetLineColor(kAzure - 3);
 		expoFitR->SetLineWidth(4.0);
 		if(plotFit){expoFitR->Draw("SAME");}
-		if(plotFit){TPaveText *stats = statsBox({.34,.62,.63,.88}, track_count, expoFitL, expoFitR);stats->Draw();}
-		//if(!plotFit){TPaveText *stats = statsBox({.34,.8,.63,.88}, track_count);stats->Draw();}
-		//TPaveText *stats = statsBox({.2,.2,.49,.46}, track_count, expoFitL, expoFitR);
+		if(plotStats){
+			if(plotFit){TPaveText *stats = statsBox({.34,.62,.63,.88}, track_count, expoFitL, expoFitR);stats->Draw();}
+			if(!plotFit){TPaveText *stats = statsBox({.34,.8,.63,.88}, track_count);stats->Draw();}
+		}
 
-		saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_xDrift_" + histName + tag);
+		saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_fullscale_xDrift_" + histName + tag);
 
     }
 
@@ -116,11 +131,15 @@ int main(int argc, char**argv) {
 
         setMarker<TGraphErrors>(MPVplotL, 1, 20, 0.7);
 		MPVplotL->SetTitle("East TPC;t (ms); dQ/dx MPV (ADC/cm)");
+		MPVplotL->SetMinimum(MPVmin);
+    	MPVplotL->SetMaximum(MPVmax);
 		expoFitL->SetLineColor(coral);
 		expoFitL->SetLineWidth(4.0);
 		setFontSize<TGraphErrors>(MPVplotL, 133, 25);
 		setMarker<TGraphErrors>(MPVplotR, 1, 20, 0.7);
 		MPVplotR->SetTitle("West TPC;t (ms); dQ/dx MPV (ADC/cm)");
+		MPVplotR->SetMinimum(MPVmin);
+    	MPVplotR->SetMaximum(MPVmax);
 		expoFitR->SetLineColor(kAzure - 3);
 		expoFitR->SetLineWidth(4.0);
 		setFontSize<TGraphErrors>(MPVplotR, 133, 25);
@@ -130,16 +149,22 @@ int main(int argc, char**argv) {
 		pad1->cd();	
 		MPVplotL->Draw("AP");	
 		if(plotFit){expoFitL->Draw("SAME");}
-		if(plotFit){TPaveText *statsL = statsBox({.45,.65,.80,.88}, track_count, expoFitL);statsL->Draw();}
-		//if(!plotFit){TPaveText *statsL = statsBox({.45,.82,.80,.88}, track_count);statsL->Draw();}
+		if(plotStats){
+			if(plotFit){TPaveText *statsL = statsBox({.45,.65,.80,.88}, track_count, expoFitL);statsL->Draw();}
+			if(!plotFit){TPaveText *statsL = statsBox({.45,.82,.80,.88}, track_count);statsL->Draw();}
+		}
 		c_split->cd();
 		pad2->Draw();
 		pad2->cd();
 		MPVplotR->Draw("AP");
 		if(plotFit){expoFitR->Draw("SAME");}
+		if(plotStats){
 		if(plotFit){TPaveText *statsR = statsBox({.45,.65,.80,.88}, track_count, expoFitR);statsR->Draw();}
-		//if(!plotFit){TPaveText *statsR = statsBox({.45,.82,.80,.88}, track_count);statsR->Draw();}
-        saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_tDrift_" + histName + tag);
+		if(!plotFit){TPaveText *statsR = statsBox({.45,.82,.80,.88}, track_count);statsR->Draw();}
+		}
+        saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_fullscale_tDrift_" + histName + tag);
+
+		std::cout << track_count << std::endl;
 
     }
 
