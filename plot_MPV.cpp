@@ -26,6 +26,7 @@ int main(int argc, char**argv) {
 	int plotStats = 0;
 	int MPVmin = 940;
 	int MPVmax = 1060;
+	int col = 0;
 
 	for(int i=0; i<argc; ++i){
 		if(!strcmp(argv[i], "--config")){
@@ -48,6 +49,9 @@ int main(int argc, char**argv) {
 		}
 		if(!strcmp(argv[i], "--MPVmax")){
 			MPVmax = std::stoi(argv[i+1]);
+		}
+		if(!strcmp(argv[i], "--col")){
+			colour = argv[i+1];
 		}
 	}
 
@@ -121,6 +125,11 @@ int main(int argc, char**argv) {
 
         TCanvas *c_split = new TCanvas();
         c_split->SetWindowSize(2000,500);
+		if(col){
+			c_split->SetFillColor(powderBlue);
+			c_split->SetFillStyle(1001);
+			c_split->SetFrameLineColor(deepViolet);
+		}
         TPad *pad1 = new TPad("pad1", "", 0, 0, 0.5, 1.0);
         TPad *pad2 = new TPad("pad2", "", 0.5, 0, 1.0, 1.0);
         c_split->cd();
@@ -128,11 +137,32 @@ int main(int argc, char**argv) {
         pad1->SetLeftMargin(0.18);
         pad2->SetRightMargin(0.15);
         pad2->SetLeftMargin(0.18);
+		if(col){
+			pad1->SetFillColor(powderBlue);
+			pad1->SetFillStyle(4100);
+			pad1->SetFrameFillColor(powderBlue);
+			pad1->SetFrameLineColor(deepViolet);
+			pad1->SetFrameFillStyle(4100);
+			pad2->SetFillColor(powderBlue);
+			pad2->SetFillStyle(4100);
+			pad2->SetFrameFillColor(powderBlue);
+			pad2->SetFrameLineColor(deepViolet);
+			pad2->SetFrameFillStyle(4100);
+		}
 
         setMarker<TGraphErrors>(MPVplotL, 1, 20, 0.7);
 		MPVplotL->SetTitle("East TPC;t (ms); dQ/dx MPV (ADC/cm)");
 		MPVplotL->SetMinimum(MPVmin);
     	MPVplotL->SetMaximum(MPVmax);
+		MPVplotL->GetYaxis()->SetNdivisions(505);
+		if(col){
+			MPVplotL->GetXaxis()->SetAxisColor(deepViolet);
+			MPVplotL->GetXaxis()->SetLabelColor(deepViolet);
+			MPVplotL->GetXaxis()->SetTitleColor(deepViolet);
+			MPVplotL->GetYaxis()->SetAxisColor(deepViolet);
+			MPVplotL->GetYaxis()->SetLabelColor(deepViolet);
+			MPVplotL->GetYaxis()->SetTitleColor(deepViolet);
+		}
 		expoFitL->SetLineColor(coral);
 		expoFitL->SetLineWidth(4.0);
 		setFontSize<TGraphErrors>(MPVplotL, 133, 25);
@@ -140,6 +170,15 @@ int main(int argc, char**argv) {
 		MPVplotR->SetTitle("West TPC;t (ms); dQ/dx MPV (ADC/cm)");
 		MPVplotR->SetMinimum(MPVmin);
     	MPVplotR->SetMaximum(MPVmax);
+		MPVplotR->GetYaxis()->SetNdivisions(505);
+		if(col){
+			MPVplotR->GetXaxis()->SetAxisColor(deepViolet);
+			MPVplotR->GetXaxis()->SetLabelColor(deepViolet);
+			MPVplotR->GetXaxis()->SetTitleColor(deepViolet);
+			MPVplotR->GetYaxis()->SetAxisColor(deepViolet);
+			MPVplotR->GetYaxis()->SetLabelColor(deepViolet);
+			MPVplotR->GetYaxis()->SetTitleColor(deepViolet);
+		}
 		expoFitR->SetLineColor(kAzure - 3);
 		expoFitR->SetLineWidth(4.0);
 		setFontSize<TGraphErrors>(MPVplotR, 133, 25);
