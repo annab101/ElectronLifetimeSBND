@@ -51,7 +51,7 @@ int main(int argc, char**argv) {
 			MPVmax = std::stoi(argv[i+1]);
 		}
 		if(!strcmp(argv[i], "--col")){
-			colour = argv[i+1];
+			col = argv[i+1];
 		}
 	}
 
@@ -93,12 +93,25 @@ int main(int argc, char**argv) {
         c_plain->SetLeftMargin(0.15);
         c_plain->SetRightMargin(0.18);
         c_plain->SetBottomMargin(0.12);
+		if(col){
+			c_plain->SetFillColor(powderBlue);
+			c_plain->SetFillStyle(1001);
+			c_plain->SetFrameLineColor(deepViolet);
+		}
 
         setMarker<TGraphErrors>(MPVplot, 1, 20, 0.7);
 		MPVplot->SetTitle(";x (cm);dQ/dx MPV (ADC/cm)");
 		MPVplot->SetMinimum(MPVmin);
     	MPVplot->SetMaximum(MPVmax);
 		MPVplot->GetXaxis()->SetNdivisions(505);
+		if(col){
+			MPVplot->GetXaxis()->SetAxisColor(deepViolet);
+			MPVplot->GetXaxis()->SetLabelColor(deepViolet);
+			MPVplot->GetXaxis()->SetTitleColor(deepViolet);
+			MPVplot->GetYaxis()->SetAxisColor(deepViolet);
+			MPVplot->GetYaxis()->SetLabelColor(deepViolet);
+			MPVplot->GetYaxis()->SetTitleColor(deepViolet);
+		}
 		setFontSize<TGraphErrors>(MPVplot, 133, 25);
 		MPVplot->Draw("AP");
 		expoFitL->SetLineColor(coral);
@@ -112,7 +125,8 @@ int main(int argc, char**argv) {
 			if(!plotFit){TPaveText *stats = statsBox({.34,.8,.63,.88}, track_count);stats->Draw();}
 		}
 
-		saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_fullscale_xDrift_" + histName + tag);
+		if(col){saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_colour_xDrift_" + histName + tag);}
+        if(!col){saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_xDrift_" + histName + tag);}
 
     }
 
@@ -201,7 +215,9 @@ int main(int argc, char**argv) {
 		if(plotFit){TPaveText *statsR = statsBox({.45,.65,.80,.88}, track_count, expoFitR);statsR->Draw();}
 		if(!plotFit){TPaveText *statsR = statsBox({.45,.82,.80,.88}, track_count);statsR->Draw();}
 		}
-        saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_fullscale_tDrift_" + histName + tag);
+		
+        if(col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_colour_tDrift_" + histName + tag);}
+        if(!col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_tDrift_" + histName + tag);}
 
 		std::cout << track_count << std::endl;
 
