@@ -22,6 +22,7 @@ int main(int argc, char**argv) {
 	std::string filename = "noFile";
     std::string histName = "noHist";
     int distOrTime = 0; //0 = distance, 1 = time
+    int col = 0;
 
 	for(int i=0; i<argc; ++i){
 		if(!strcmp(argv[i], "--config")){
@@ -32,6 +33,12 @@ int main(int argc, char**argv) {
 		}
         if(!strcmp(argv[i], "--distOrTime")){
 			distOrTime = std::stoi(argv[i+1]);
+		}
+        if(!strcmp(argv[i], "--distOrTime")){
+			distOrTime = std::stoi(argv[i+1]);
+		}
+        if(!strcmp(argv[i], "--col")){
+			col = std::stoi(argv[i+1]);
 		}
 	}
 
@@ -94,6 +101,10 @@ int main(int argc, char**argv) {
 
         TCanvas *c_split = new TCanvas();
         c_split->SetWindowSize(2000,500);
+        if(col){
+            c_split->SetFillColor(powderBlue);
+            c_split->SetFillStyle(1001);
+        }
         TPad *pad1 = new TPad("pad1", "", 0, 0, 0.5, 1.0);
         TPad *pad2 = new TPad("pad2", "", 0.5, 0, 1.0, 1.0);
         c_split->cd();
@@ -101,6 +112,16 @@ int main(int argc, char**argv) {
         pad1->SetLeftMargin(0.18);
         pad2->SetRightMargin(0.20);
         pad2->SetLeftMargin(0.18);
+        if(col){
+            pad1->SetFillColor(powderBlue);
+            pad1->SetFillStyle(4100);
+            pad1->SetFrameFillColor(powderBlue);
+            pad1->SetFrameFillStyle(4100);
+            pad2->SetFillColor(powderBlue);
+            pad2->SetFillStyle(4100);
+            pad2->SetFrameFillColor(powderBlue);
+            pad2->SetFrameFillStyle(4100);
+        }
 
         hL->SetStats(0);
         hL->SetTitle(";t (ms);dQ/dx (ADC/cm);Entries");
@@ -109,10 +130,23 @@ int main(int argc, char**argv) {
         hL->GetYaxis()->SetLabelOffset(0.01);
         hL->GetYaxis()->SetNdivisions(505);
         hL->GetYaxis()->SetTitleOffset(1.8);
+        if(col){
+            hL->GetXaxis()->SetAxisColor(deepViolet);
+            hL->GetXaxis()->SetLabelColor(deepViolet);
+            hL->GetXaxis()->SetTitleColor(deepViolet);
+            hL->GetYaxis()->SetAxisColor(deepViolet);
+            hL->GetYaxis()->SetLabelColor(deepViolet);
+            hL->GetYaxis()->SetTitleColor(deepViolet);
+        }
         setFontSize<TH2>(hL, 133, 25);
         setFontSizeZ(hL, 133, 25);
         hL->GetZaxis()->CenterTitle(true);
         hL->GetZaxis()->SetTitleOffset(2.0);
+        if(col){
+            hL->GetZaxis()->SetAxisColor(deepViolet);
+            hL->GetZaxis()->SetLabelColor(deepViolet);
+            hL->GetZaxis()->SetTitleColor(deepViolet);
+        }
 
         hR->SetStats(0);
         hR->SetTitle(";t (ms);dQ/dx (ADC/cm);Entries");
@@ -121,10 +155,23 @@ int main(int argc, char**argv) {
         hR->GetYaxis()->SetLabelOffset(0.01);
         hR->GetYaxis()->SetNdivisions(505);
         hR->GetYaxis()->SetTitleOffset(1.8);
+        if(col){
+            hR->GetXaxis()->SetAxisColor(deepViolet);
+            hR->GetXaxis()->SetLabelColor(deepViolet);
+            hR->GetXaxis()->SetTitleColor(deepViolet);
+            hR->GetYaxis()->SetAxisColor(deepViolet);
+            hR->GetYaxis()->SetLabelColor(deepViolet);
+            hR->GetYaxis()->SetTitleColor(deepViolet);
+        }
         setFontSize<TH2>(hR, 133, 25);
         setFontSizeZ(hR, 133, 25);
         hR->GetZaxis()->CenterTitle(true);
         hR->GetZaxis()->SetTitleOffset(2.0);
+        if(col){
+            hR->GetZaxis()->SetAxisColor(deepViolet);
+            hR->GetZaxis()->SetLabelColor(deepViolet);
+            hR->GetZaxis()->SetTitleColor(deepViolet);
+        }
 
         c_split->cd();		
         pad1->Draw();		
@@ -134,7 +181,8 @@ int main(int argc, char**argv) {
         pad2->Draw();
         pad2->cd();
         hR->Draw("COLZ");
-        saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_tDrift_" + histName + tag);
+        if(col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_colour_tDrift_" + histName + tag);}
+        if(!col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_tDrift_" + histName + tag);}
 
     }
 
