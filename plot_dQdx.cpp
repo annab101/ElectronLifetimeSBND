@@ -18,6 +18,9 @@ using namespace constants;
 using namespace cppsecrets;
 
 int main(int argc, char**argv) {
+
+    Color_t actualWhite = TColor::GetFreeColorIndex();
+    TColor *ci = new TColor(actualWhite, 1., 1., 1.);
 	
 	std::string filename = "noFile";
     std::string histName = "noHist";
@@ -30,9 +33,6 @@ int main(int argc, char**argv) {
 		}
         if(!strcmp(argv[i], "--histName")){
 			histName = argv[i+1];
-		}
-        if(!strcmp(argv[i], "--distOrTime")){
-			distOrTime = std::stoi(argv[i+1]);
 		}
         if(!strcmp(argv[i], "--distOrTime")){
 			distOrTime = std::stoi(argv[i+1]);
@@ -77,7 +77,7 @@ int main(int argc, char**argv) {
         c_plain->SetBottomMargin(0.12);
 
         h->SetStats(0);
-        h->SetTitle(";x (cm);dQ/dx (ADC/cm);Entries");
+        h->SetTitle(";x_{#scale[1.2]{drift}} (cm);Collection Plane dQ/dx (ADC/cm);Entries");
         h->GetXaxis()->SetLabelOffset(0.01);
         h->GetXaxis()->SetNdivisions(505);
         h->GetYaxis()->SetLabelOffset(0.01);
@@ -88,6 +88,15 @@ int main(int argc, char**argv) {
         h->GetZaxis()->CenterTitle(true);
         h->GetZaxis()->SetTitleOffset(2.0);
         h->Draw("COLZ");
+
+        std::vector<std::string> SBNDlabels = {
+            "SBND: Data Run 14608",
+            "Anode-cathode crossing tracks",
+            "Preliminary"
+        };
+
+        TPaveText *labels = plotLabels({.18,.70,.46,.85}, SBNDlabels, actualWhite, 133,22);
+        labels->Draw();
         saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_xDrift_" + histName + tag);
 
     }
@@ -108,10 +117,12 @@ int main(int argc, char**argv) {
         TPad *pad1 = new TPad("pad1", "", 0, 0, 0.5, 1.0);
         TPad *pad2 = new TPad("pad2", "", 0.5, 0, 1.0, 1.0);
         c_split->cd();
-        pad1->SetRightMargin(0.20);
+        pad1->SetRightMargin(0.22);
         pad1->SetLeftMargin(0.18);
-        pad2->SetRightMargin(0.20);
+        pad1->SetBottomMargin(0.15);
+        pad2->SetRightMargin(0.22);
         pad2->SetLeftMargin(0.18);
+        pad2->SetBottomMargin(0.15);
         if(col){
             pad1->SetFillColor(powderBlue);
             pad1->SetFillStyle(4100);
@@ -124,7 +135,7 @@ int main(int argc, char**argv) {
         }
 
         hL->SetStats(0);
-        hL->SetTitle(";t (ms);dQ/dx (ADC/cm);Entries");
+        hL->SetTitle(";t_{#scale[1.2]{drift}} (ms);Collection Plane dQ/dx (ADC/cm);Entries");
         hL->GetXaxis()->SetLabelOffset(0.01);
         hL->GetXaxis()->SetNdivisions(505);
         hL->GetYaxis()->SetLabelOffset(0.01);
@@ -138,8 +149,8 @@ int main(int argc, char**argv) {
             hL->GetYaxis()->SetLabelColor(deepViolet);
             hL->GetYaxis()->SetTitleColor(deepViolet);
         }
-        setFontSize<TH2>(hL, 133, 25);
-        setFontSizeZ(hL, 133, 25);
+        setFontSize<TH2>(hL, 133, 30);
+        setFontSizeZ(hL, 133, 30);
         hL->GetZaxis()->CenterTitle(true);
         hL->GetZaxis()->SetTitleOffset(2.0);
         if(col){
@@ -149,7 +160,7 @@ int main(int argc, char**argv) {
         }
 
         hR->SetStats(0);
-        hR->SetTitle(";t (ms);dQ/dx (ADC/cm);Entries");
+        hR->SetTitle(";t_{#scale[1.2]{drift}} (ms);Collection Plane dQ/dx (ADC/cm);Entries");
         hR->GetXaxis()->SetLabelOffset(0.01);
         hR->GetXaxis()->SetNdivisions(505);
         hR->GetYaxis()->SetLabelOffset(0.01);
@@ -163,8 +174,8 @@ int main(int argc, char**argv) {
             hR->GetYaxis()->SetLabelColor(deepViolet);
             hR->GetYaxis()->SetTitleColor(deepViolet);
         }
-        setFontSize<TH2>(hR, 133, 25);
-        setFontSizeZ(hR, 133, 25);
+        setFontSize<TH2>(hR, 133, 30);
+        setFontSizeZ(hR, 133, 30);
         hR->GetZaxis()->CenterTitle(true);
         hR->GetZaxis()->SetTitleOffset(2.0);
         if(col){
@@ -177,12 +188,94 @@ int main(int argc, char**argv) {
         pad1->Draw();		
         pad1->cd();	
         hL->Draw("COLZ");
+        std::vector<std::string> SBNDlabelsE = {
+            "SBND: Data Run 14608",
+            "Anode-cathode crossing tracks",
+            "Preliminary",
+            "East TPC"
+        };
+        TPaveText *labelsE = plotLabels({.21,.65,.49,.85}, SBNDlabelsE, actualWhite, 133,24);
+        labelsE->Draw();
         c_split->cd();
         pad2->Draw();
         pad2->cd();
         hR->Draw("COLZ");
+        std::vector<std::string> SBNDlabelsW = {
+            "SBND: Data Run 14608",
+            "Anode-cathode crossing tracks",
+            "Preliminary",
+            "West TPC"
+        };
+        TPaveText *labelsW = plotLabels({.21,.65,.49,.85}, SBNDlabelsW, actualWhite, 133,24);
+        labelsW->Draw();
         if(col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_colour_tDrift_" + histName + tag);}
         if(!col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_tDrift_" + histName + tag);}
+
+    }
+
+    if(distOrTime == 2){ //separate plots for E and W
+
+        TH2D *hL, *hR;
+
+        hL = (TH2D*)f.Get(("h_dQdx_tDriftL_" + histName).c_str());
+        hR = (TH2D*)f.Get(("h_dQdx_tDriftR_" + histName).c_str());
+
+        TCanvas *c = new TCanvas();
+        c->SetLeftMargin(0.15);
+        c->SetRightMargin(0.18);
+        c->SetBottomMargin(0.12);
+
+        hL->SetStats(0);
+        hL->SetTitle(";t_{#scale[1.2]{drift}} (ms);Collection Plane dQ/dx (ADC/cm);Entries");
+        hL->GetXaxis()->SetLabelOffset(0.01);
+        hL->GetXaxis()->SetNdivisions(505);
+        hL->GetYaxis()->SetLabelOffset(0.01);
+        hL->GetYaxis()->SetNdivisions(505);
+        hL->GetYaxis()->SetTitleOffset(1.8);
+        setFontSize<TH2>(hL, 133, 25);
+        setFontSizeZ(hL, 133, 25);
+        hL->GetZaxis()->CenterTitle(true);
+        hL->GetZaxis()->SetTitleOffset(2.0);
+        
+        hR->SetStats(0);
+        hR->SetTitle(";t_{#scale[1.2]{drift}} (ms);Collection Plane dQ/dx (ADC/cm);Entries");
+        hR->GetXaxis()->SetLabelOffset(0.01);
+        hR->GetXaxis()->SetNdivisions(505);
+        hR->GetYaxis()->SetLabelOffset(0.01);
+        hR->GetYaxis()->SetNdivisions(505);
+        hR->GetYaxis()->SetTitleOffset(1.8);
+        setFontSize<TH2>(hR, 133, 25);
+        setFontSizeZ(hR, 133, 25);
+        hR->GetZaxis()->CenterTitle(true);
+        hR->GetZaxis()->SetTitleOffset(2.0);
+
+        c->cd();		
+        hL->Draw("COLZ");
+        std::vector<std::string> SBNDlabelsE = {
+            "SBND: Data Run 14608",
+            "Anode-cathode crossing tracks",
+            "Preliminary",
+            "East TPC"
+        };
+        TPaveText *labelsE = plotLabels({.18,.65,.46,.85}, SBNDlabelsE, actualWhite, 133,22);
+        labelsE->Draw();
+        saveFig(c, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_colour_tDriftE_" + histName + tag);
+
+        openAndClear(c);
+        c->SetLeftMargin(0.15);
+        c->SetRightMargin(0.18);
+        c->SetBottomMargin(0.12);
+        c->cd();
+        hR->Draw("COLZ");
+        std::vector<std::string> SBNDlabelsW = {
+            "SBND: Data Run 14608",
+            "Anode-cathode crossing tracks",
+            "Preliminary",
+            "West TPC"
+        };
+        TPaveText *labelsW = plotLabels({.18,.65,.46,.85}, SBNDlabelsW, actualWhite, 133,22);
+        labelsW->Draw();
+        saveFig(c, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_colour_tDriftW_" + histName + tag);
 
     }
 
