@@ -72,6 +72,18 @@ namespace calib {
     TPaveText *statsBox(std::vector<double> pos, int track_count);
 
     /**
+    * @brief Put labels on plot (e.g SBND Preliminary,).
+    *
+    * @param pos Stats box position
+    * @param lines Lines for stats box
+    * @param textColor Colour of text
+    * @param font Font
+    * @param size Font size
+    */
+
+    TPaveText *plotLabels(std::vector<double> pos, std::vector<std::string> lines, Color_t textColor, int font, int size);
+
+    /**
     * @brief Set font size for a plot.
     *
     * @param t The thing being plotted

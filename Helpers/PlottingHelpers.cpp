@@ -76,6 +76,24 @@ namespace calib {
         return pt;
     }
 
+    TPaveText *plotLabels(std::vector<double> pos, std::vector<std::string> lines, Color_t textColor, int font, int size){
+        
+        TPaveText *pt = new TPaveText(pos[0], pos[1], pos[2], pos[3], "blNDC");
+
+        pt->SetBorderSize(0);
+        pt->SetFillColorAlpha(0,0.0);
+        pt->SetTextAlign(11);
+        pt->SetTextFont(font);
+        pt->SetTextSize(size);
+
+        for(int i=0; i < lines.size(); i++){
+            pt->AddText(lines[i].c_str());
+            ((TText*)pt->GetListOfLines()->Last())->SetTextColor(textColor);
+        }
+        
+        return pt;
+    }
+
     template<class T> void setFontSize(T *t, int font, int size){
 	
         t->GetXaxis()->SetTitleFont(font);
