@@ -29,5 +29,6 @@
 #include "TPaveStats.h"
 #include "TLatex.h"
 #include "TMultiGraph.h"
+#include "TGraphAsymmErrors.h"
 
 #endif
