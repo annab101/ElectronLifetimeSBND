@@ -85,7 +85,7 @@ int main(int argc, char**argv) {
 	std::cout << "----Retrieving file----------------------------------------------------" << std::endl;
 
 	//define names of plots
-	std::string mydata_cosmics = "/exp/sbnd/data/users/abeever/cosmics_analysis/";
+	std::string mydata_cosmics = "/exp/sbnd/data/users/abeever/cosmics_analysis/Lifetime/";
 
 	std::string dQdxPlotName = "dQdx_hist_" + fileSaveID + ".png";
 	std::string dQdxProjYPlotName = "dQdxProjY_hist_" + fileSaveID; //no .png since files labelled also by bin number
@@ -372,7 +372,7 @@ int main(int argc, char**argv) {
 			pad2_tMPV->cd();
 			MPVfancyDraw(MPVplot_R, 1, 1);
 			TPaveText *pt_R = new TPaveText(.50,.75,.80,.88,"blNDC");
-			fitExpoInT(TPCFit, MPVplot_R, t_formula, pt_R, track_count, kGreen + 1);
+			fitExpoInT(TPCFit, MPVplot_R, t_formula, pt_R, track_count, kViolet + 4);
 
 			c_tMPV->SaveAs(MPVtSaveLoc.c_str());
 
@@ -916,7 +916,7 @@ void fitExpoInX(TGraphErrors *MPVplot, int track_count){
 	RightTPCFit->SetParNames("Norm","Lifetime");
 
 	LeftTPCFit->SetLineColor(kRed);
-	RightTPCFit->SetLineColor(kGreen + 1);
+	RightTPCFit->SetLineColor(kViolet + 4);
 
 	//Set initial parameters based on roughly the expected values (lifetime simulated as 10ms)
 	LeftTPCFit->SetParameter(0,1000);

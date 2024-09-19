@@ -1,0 +1,44 @@
+Things a config file would need in it:
+
+codeConfig
+tag
+maxWireGroup
+N_bins:
+- should have option for bins in x, t, dQdx, max and min values
+mydata_cosmics - i.e the folder where everything is done from
+
+should be
+cosmics_analysis/lifetime_analysis/
+
+then want a folder where that particular run is saved
+e.g make folder 2022Afull/
+This folder should be an option/config thing so that it is consistent
+
+Saving conventions:
+
+Want
+dQdx_hist_ + classic/multiwire/multihit/angle/wireAndAngle + dataset (e.g 2022Afull)
+dQdx_proj_ + classic/multiwire/multihit/angle/wireAndAngle + dataset (e.g 2022Afull)
+MPV_ + + classic/multiwire/multihit/angle/wireAndAngle + dataset (e.g 2022Afull)
+
+Each root file contains hists/graphs that are named individually
+dQdx_hist... contains hists labelled by basic/nWires10/nHits10/ang60to80/ang60to80nWires10
+
+Config bit of name can be done in code - classic/multiwire/...
+Dataset bit of name can be done in config file or as option
+Config bit of root file name can be done in code too
+
+Config options:
+Either:
+Header file with everything in 
+Or:
+config reader like Rhiannon has
+Or:
+Something similar - needs to be accessed by all the bits of code consistently
+
+Files to run in order:
+dQdx_hist.cpp
+MPV.cpp
+fitMPV.cpp
+multiwire.cpp
+
