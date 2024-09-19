@@ -106,9 +106,9 @@ int main(int argc, char**argv) {
 		fitLGParameters fp_tDriftL;
 		fitLGParameters fp_tDriftR;
 
-		TGraphErrors *MPVplot_xDrift_basic = new TGraphErrors();
-		TGraphErrors *MPVplot_tDriftL_basic = new TGraphErrors();
-		TGraphErrors *MPVplot_tDriftR_basic = new TGraphErrors();
+		TGraphAsymmErrors *MPVplot_xDrift_basic = new TGraphAsymmErrors();
+		TGraphAsymmErrors *MPVplot_tDriftL_basic = new TGraphAsymmErrors();
+		TGraphAsymmErrors *MPVplot_tDriftR_basic = new TGraphAsymmErrors();
 
 		ff.cd();
 
@@ -128,30 +128,30 @@ int main(int argc, char**argv) {
 
 			}
 
-			SetLGParameters(projY_xDrift_basic, fp_xDrift.fp, fp_xDrift.efp, fp_xDrift.lb, fp_xDrift.ub);
-			SetLGParameters(projY_tDriftL_basic, fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.lb, fp_tDriftL.ub);
-			SetLGParameters(projY_tDriftR_basic, fp_tDriftR.fp, fp_tDriftR.efp, fp_tDriftR.lb, fp_tDriftR.ub);
+			SetLGParameters(projY_xDrift_basic, fp_xDrift.fp, fp_xDrift.ehfp, fp_xDrift.elfp, fp_xDrift.lb, fp_xDrift.ub);
+			SetLGParameters(projY_tDriftL_basic, fp_tDriftL.fp, fp_tDriftL.ehfp, fp_tDriftL.elfp, fp_tDriftL.lb, fp_tDriftL.ub);
+			SetLGParameters(projY_tDriftR_basic, fp_tDriftR.fp, fp_tDriftR.ehfp, fp_tDriftR.elfp, fp_tDriftR.lb, fp_tDriftR.ub);
 
-			LGfit_xDrift_basic = fitter(projY_xDrift_basic, fp_xDrift.lb, fp_xDrift.ub, fp_xDrift.fp, fp_xDrift.efp, fp_xDrift.cov, "LG");
-			LGfit_tDriftL_basic = fitter(projY_tDriftL_basic, fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.cov, "LG");
-			LGfit_tDriftR_basic = fitter(projY_tDriftR_basic, fp_tDriftR.lb, fp_tDriftR.ub, fp_tDriftR.fp, fp_tDriftR.efp, fp_tDriftR.cov, "LG");
+			LGfit_xDrift_basic = fitter(projY_xDrift_basic, fp_xDrift.lb, fp_xDrift.ub, fp_xDrift.fp, fp_xDrift.ehfp, fp_xDrift.elfp, fp_xDrift.cov, "LG");
+			LGfit_tDriftL_basic = fitter(projY_tDriftL_basic, fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.ehfp, fp_tDriftL.elfp, fp_tDriftL.cov, "LG");
+			LGfit_tDriftR_basic = fitter(projY_tDriftR_basic, fp_tDriftR.lb, fp_tDriftR.ub, fp_tDriftR.fp, fp_tDriftR.ehfp, fp_tDriftR.elfp, fp_tDriftR.cov, "LG");
 
 			if(fp_xDrift.fp[1] >= 0.){
 
 				MPVplot_xDrift_basic->SetPoint(MPVplot_xDrift_basic->GetN(), h_dQdx_xDrift_basic->GetXaxis()->GetBinCenter(i), fp_xDrift.fp[1]);
-				MPVplot_xDrift_basic->SetPointError(MPVplot_xDrift_basic->GetN() - 1, 0., fp_xDrift.efp[1]);
+				MPVplot_xDrift_basic->SetPointError(MPVplot_xDrift_basic->GetN() - 1, 0., 0., -1*fp_xDrift.elfp[1], fp_xDrift.ehfp[1]);
 			}
 
 			if(fp_tDriftL.fp[1] >= 0.){
 
 				MPVplot_tDriftL_basic->SetPoint(MPVplot_tDriftL_basic->GetN(), h_dQdx_tDriftL_basic->GetXaxis()->GetBinCenter(i), fp_tDriftL.fp[1]);
-				MPVplot_tDriftL_basic->SetPointError(MPVplot_tDriftL_basic->GetN() - 1, 0., fp_tDriftL.efp[1]);
+				MPVplot_tDriftL_basic->SetPointError(MPVplot_tDriftL_basic->GetN() - 1, 0., 0., -1*fp_tDriftL.elfp[1], fp_tDriftL.ehfp[1]);
 			}
 
 			if(fp_tDriftR.fp[1] >= 0.){
 
 				MPVplot_tDriftR_basic->SetPoint(MPVplot_tDriftR_basic->GetN(), h_dQdx_tDriftR_basic->GetXaxis()->GetBinCenter(i), fp_tDriftR.fp[1]);
-				MPVplot_tDriftR_basic->SetPointError(MPVplot_tDriftR_basic->GetN() - 1, 0., fp_tDriftR.efp[1]);
+				MPVplot_tDriftR_basic->SetPointError(MPVplot_tDriftR_basic->GetN() - 1, 0., 0., -1*fp_tDriftR.elfp[1], fp_tDriftR.ehfp[1]);
 			}
 
 			if((bool)writeProjY){
@@ -204,15 +204,15 @@ int main(int argc, char**argv) {
 		fitLGParameters fp_tDriftL;
 		fitLGParameters fp_tDriftR;
 
-		TGraphErrors *MPVplot_xDrift_wires[maxWireGroup];
-		TGraphErrors *MPVplot_tDriftL_wires[maxWireGroup];
-		TGraphErrors *MPVplot_tDriftR_wires[maxWireGroup];
+		TGraphAsymmErrors *MPVplot_xDrift_wires[maxWireGroup];
+		TGraphAsymmErrors *MPVplot_tDriftL_wires[maxWireGroup];
+		TGraphAsymmErrors *MPVplot_tDriftR_wires[maxWireGroup];
 
 		for(int i = 1; i <= maxWireGroup; i++){
 
-			MPVplot_xDrift_wires[i-1] = new TGraphErrors(); 
-			MPVplot_tDriftL_wires[i-1] = new TGraphErrors();
-			MPVplot_tDriftR_wires[i-1] = new TGraphErrors();
+			MPVplot_xDrift_wires[i-1] = new TGraphAsymmErrors(); 
+			MPVplot_tDriftL_wires[i-1] = new TGraphAsymmErrors();
+			MPVplot_tDriftR_wires[i-1] = new TGraphAsymmErrors();
 
 		}
 
@@ -240,13 +240,13 @@ int main(int argc, char**argv) {
 
 				}
 
-				SetLGParameters(projY_xDrift_wires[i-1], fp_xDrift.fp, fp_xDrift.efp, fp_xDrift.lb, fp_xDrift.ub);
-				SetLGParameters(projY_tDriftL_wires[i-1], fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.lb, fp_tDriftL.ub);
-				SetLGParameters(projY_tDriftR_wires[i-1], fp_tDriftR.fp, fp_tDriftR.efp, fp_tDriftR.lb, fp_tDriftR.ub);
+				SetLGParameters(projY_xDrift_wires[i-1], fp_xDrift.fp, fp_xDrift.ehfp, fp_xDrift.elfp, fp_xDrift.lb, fp_xDrift.ub);
+				SetLGParameters(projY_tDriftL_wires[i-1], fp_tDriftL.fp, fp_tDriftL.ehfp, fp_tDriftL.elfp, fp_tDriftL.lb, fp_tDriftL.ub);
+				SetLGParameters(projY_tDriftR_wires[i-1], fp_tDriftR.fp, fp_tDriftR.ehfp, fp_tDriftR.elfp, fp_tDriftR.lb, fp_tDriftR.ub);
 
-				LGfit_xDrift_wires[i-1] = fitter(projY_xDrift_wires[i-1], fp_xDrift.lb, fp_xDrift.ub, fp_xDrift.fp, fp_xDrift.efp, fp_xDrift.cov, "LG");
-				LGfit_tDriftL_wires[i-1] = fitter(projY_tDriftL_wires[i-1], fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.cov, "LG");
-				LGfit_tDriftR_wires[i-1] = fitter(projY_tDriftR_wires[i-1], fp_tDriftR.lb, fp_tDriftR.ub, fp_tDriftR.fp, fp_tDriftR.efp, fp_tDriftR.cov, "LG");
+				LGfit_xDrift_wires[i-1] = fitter(projY_xDrift_wires[i-1], fp_xDrift.lb, fp_xDrift.ub, fp_xDrift.fp, fp_xDrift.ehfp, fp_xDrift.elfp, fp_xDrift.cov, "LG");
+				LGfit_tDriftL_wires[i-1] = fitter(projY_tDriftL_wires[i-1], fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.ehfp, fp_tDriftL.elfp, fp_tDriftL.cov, "LG");
+				LGfit_tDriftR_wires[i-1] = fitter(projY_tDriftR_wires[i-1], fp_tDriftR.lb, fp_tDriftR.ub, fp_tDriftR.fp, fp_tDriftR.ehfp, fp_tDriftR.elfp, fp_tDriftR.cov, "LG");
 
 				if((bool)writeProjY){
 
@@ -263,19 +263,19 @@ int main(int argc, char**argv) {
 				if(fp_xDrift.fp[1] >= 0.){
 
 					MPVplot_xDrift_wires[i-1]->SetPoint(MPVplot_xDrift_wires[i-1]->GetN(), h_dQdx_xDrift_wires[i-1]->GetXaxis()->GetBinCenter(j), fp_xDrift.fp[1]);
-					MPVplot_xDrift_wires[i-1]->SetPointError(MPVplot_xDrift_wires[i-1]->GetN() - 1, 0., pointError(projY_xDrift_wires[i-1], fp_xDrift));
+					MPVplot_xDrift_wires[i-1]->SetPointError(MPVplot_xDrift_wires[i-1]->GetN() - 1, 0., 0., -1*fp_xDrift.elfp[1], fp_xDrift.ehfp[1]);
 				}
 
 				if(fp_tDriftL.fp[1] >= 0.){
 
 					MPVplot_tDriftL_wires[i-1]->SetPoint(MPVplot_tDriftL_wires[i-1]->GetN(), h_dQdx_tDriftL_wires[i-1]->GetXaxis()->GetBinCenter(j), fp_tDriftL.fp[1]);
-					MPVplot_tDriftL_wires[i-1]->SetPointError(MPVplot_tDriftL_wires[i-1]->GetN() - 1, 0., pointError(projY_tDriftL_wires[i-1], fp_tDriftL));
+					MPVplot_tDriftL_wires[i-1]->SetPointError(MPVplot_tDriftL_wires[i-1]->GetN() - 1, 0., 0., -1*fp_tDriftL.elfp[1], fp_tDriftL.ehfp[1]);
 				}
 
 				if(fp_tDriftR.fp[1] >= 0.){
 
 					MPVplot_tDriftR_wires[i-1]->SetPoint(MPVplot_tDriftR_wires[i-1]->GetN(), h_dQdx_tDriftR_wires[i-1]->GetXaxis()->GetBinCenter(j), fp_tDriftR.fp[1]);
-					MPVplot_tDriftR_wires[i-1]->SetPointError(MPVplot_tDriftR_wires[i-1]->GetN() - 1, 0., pointError(projY_tDriftR_wires[i-1], fp_tDriftR));
+					MPVplot_tDriftR_wires[i-1]->SetPointError(MPVplot_tDriftR_wires[i-1]->GetN() - 1, 0., 0., -1*fp_tDriftR.elfp[1], fp_tDriftR.ehfp[1]);
 				}
 
 			}
@@ -318,15 +318,15 @@ int main(int argc, char**argv) {
 		fitLGParameters fp_tDriftL;
 		fitLGParameters fp_tDriftR;
 
-		TGraphErrors *MPVplot_xDrift_hits[maxWireGroup];
-		TGraphErrors *MPVplot_tDriftL_hits[maxWireGroup];
-		TGraphErrors *MPVplot_tDriftR_hits[maxWireGroup];
+		TGraphAsymmErrors *MPVplot_xDrift_hits[maxWireGroup];
+		TGraphAsymmErrors *MPVplot_tDriftL_hits[maxWireGroup];
+		TGraphAsymmErrors *MPVplot_tDriftR_hits[maxWireGroup];
 
 		for(int i = 1; i <= maxWireGroup; i++){
 
-			MPVplot_xDrift_hits[i-1] = new TGraphErrors(); 
-			MPVplot_tDriftL_hits[i-1] = new TGraphErrors();
-			MPVplot_tDriftR_hits[i-1] = new TGraphErrors();
+			MPVplot_xDrift_hits[i-1] = new TGraphAsymmErrors(); 
+			MPVplot_tDriftL_hits[i-1] = new TGraphAsymmErrors();
+			MPVplot_tDriftR_hits[i-1] = new TGraphAsymmErrors();
 
 		}
 
@@ -354,30 +354,30 @@ int main(int argc, char**argv) {
 
 				}
 
-				SetLGParameters(projY_xDrift_hits[i-1], fp_xDrift.fp, fp_xDrift.efp, fp_xDrift.lb, fp_xDrift.ub);
-				SetLGParameters(projY_tDriftL_hits[i-1], fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.lb, fp_tDriftL.ub);
-				SetLGParameters(projY_tDriftR_hits[i-1], fp_tDriftR.fp, fp_tDriftR.efp, fp_tDriftR.lb, fp_tDriftR.ub);
+				SetLGParameters(projY_xDrift_hits[i-1], fp_xDrift.fp, fp_xDrift.ehfp, fp_xDrift.elfp, fp_xDrift.lb, fp_xDrift.ub);
+				SetLGParameters(projY_tDriftL_hits[i-1], fp_tDriftL.fp, fp_tDriftL.ehfp, fp_tDriftL.elfp, fp_tDriftL.lb, fp_tDriftL.ub);
+				SetLGParameters(projY_tDriftR_hits[i-1], fp_tDriftR.fp, fp_tDriftR.ehfp, fp_tDriftR.elfp, fp_tDriftR.lb, fp_tDriftR.ub);
 
-				LGfit_xDrift_hits[i-1] = fitter(projY_xDrift_hits[i-1], fp_xDrift.lb, fp_xDrift.ub, fp_xDrift.fp, fp_xDrift.efp, fp_xDrift.cov, "LG");
-				LGfit_tDriftL_hits[i-1] = fitter(projY_tDriftL_hits[i-1], fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.cov, "LG");
-				LGfit_tDriftR_hits[i-1] = fitter(projY_tDriftR_hits[i-1], fp_tDriftR.lb, fp_tDriftR.ub, fp_tDriftR.fp, fp_tDriftR.efp, fp_tDriftR.cov, "LG");
+				LGfit_xDrift_hits[i-1] = fitter(projY_xDrift_hits[i-1], fp_xDrift.lb, fp_xDrift.ub, fp_xDrift.fp, fp_xDrift.ehfp, fp_xDrift.elfp, fp_xDrift.cov, "LG");
+				LGfit_tDriftL_hits[i-1] = fitter(projY_tDriftL_hits[i-1], fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.ehfp, fp_tDriftL.elfp, fp_tDriftL.cov, "LG");
+				LGfit_tDriftR_hits[i-1] = fitter(projY_tDriftR_hits[i-1], fp_tDriftR.lb, fp_tDriftR.ub, fp_tDriftR.fp, fp_tDriftR.ehfp, fp_tDriftR.elfp, fp_tDriftR.cov, "LG");
 
 				if(fp_xDrift.fp[1] >= 0.){
 
 					MPVplot_xDrift_hits[i-1]->SetPoint(MPVplot_xDrift_hits[i-1]->GetN(), h_dQdx_xDrift_hits[i-1]->GetXaxis()->GetBinCenter(j), fp_xDrift.fp[1]);
-					MPVplot_xDrift_hits[i-1]->SetPointError(MPVplot_xDrift_hits[i-1]->GetN() - 1, 0., pointError(projY_xDrift_hits[i-1], fp_xDrift));
+					MPVplot_xDrift_hits[i-1]->SetPointError(MPVplot_xDrift_hits[i-1]->GetN() - 1, 0., 0., -1*fp_xDrift.elfp[1], fp_xDrift.ehfp[1]);
 				}
 
 				if(fp_tDriftL.fp[1] >= 0.){
 
 					MPVplot_tDriftL_hits[i-1]->SetPoint(MPVplot_tDriftL_hits[i-1]->GetN(), h_dQdx_tDriftL_hits[i-1]->GetXaxis()->GetBinCenter(j), fp_tDriftL.fp[1]);
-					MPVplot_tDriftL_hits[i-1]->SetPointError(MPVplot_tDriftL_hits[i-1]->GetN() - 1, 0., pointError(projY_tDriftL_hits[i-1], fp_tDriftL));
+					MPVplot_tDriftL_hits[i-1]->SetPointError(MPVplot_tDriftL_hits[i-1]->GetN() - 1, 0., 0., -1*fp_tDriftL.elfp[1], fp_tDriftL.ehfp[1]);
 				}
 
 				if(fp_tDriftR.fp[1] >= 0.){
 
 					MPVplot_tDriftR_hits[i-1]->SetPoint(MPVplot_tDriftR_hits[i-1]->GetN(), h_dQdx_tDriftR_hits[i-1]->GetXaxis()->GetBinCenter(j), fp_tDriftR.fp[1]);
-					MPVplot_tDriftR_hits[i-1]->SetPointError(MPVplot_tDriftR_hits[i-1]->GetN() - 1, 0., pointError(projY_tDriftR_hits[i-1], fp_tDriftR));
+					MPVplot_tDriftR_hits[i-1]->SetPointError(MPVplot_tDriftR_hits[i-1]->GetN() - 1, 0., 0., -1*fp_tDriftR.elfp[1], fp_tDriftR.ehfp[1]);
 				}
 
 			}
@@ -426,15 +426,15 @@ int main(int argc, char**argv) {
 		fitLGParameters fp0_tDriftL, fp1_tDriftL;
 		fitLGParameters fp0_tDriftR, fp1_tDriftR;
 
-		TGraphErrors *MPVplot_xDrift_ang[angBins];
-		TGraphErrors *MPVplot_tDriftL_ang[angBins];
-		TGraphErrors *MPVplot_tDriftR_ang[angBins];
+		TGraphAsymmErrors *MPVplot_xDrift_ang[angBins];
+		TGraphAsymmErrors *MPVplot_tDriftL_ang[angBins];
+		TGraphAsymmErrors *MPVplot_tDriftR_ang[angBins];
 
 		for(int i = 0; i < angBins; i++){
 
-			MPVplot_xDrift_ang[i] = new TGraphErrors(); 
-			MPVplot_tDriftL_ang[i] = new TGraphErrors();
-			MPVplot_tDriftR_ang[i] = new TGraphErrors();
+			MPVplot_xDrift_ang[i] = new TGraphAsymmErrors(); 
+			MPVplot_tDriftL_ang[i] = new TGraphAsymmErrors();
+			MPVplot_tDriftR_ang[i] = new TGraphAsymmErrors();
 
 		}
 
@@ -474,56 +474,56 @@ int main(int argc, char**argv) {
 
 				}
 
-				SetLGParameters(projY_xDrift_ang[i], fp0_xDrift.fp, fp0_xDrift.efp, fp0_xDrift.lb, fp0_xDrift.ub);
-				SetLGParameters(projY_tDriftL_ang[i], fp0_tDriftL.fp, fp0_tDriftL.efp, fp0_tDriftL.lb, fp0_tDriftL.ub);
-				SetLGParameters(projY_tDriftR_ang[i], fp0_tDriftR.fp, fp0_tDriftR.efp, fp0_tDriftR.lb, fp0_tDriftR.ub);
+				SetLGParameters(projY_xDrift_ang[i], fp0_xDrift.fp, fp0_xDrift.ehfp, fp0_xDrift.elfp, fp0_xDrift.lb, fp0_xDrift.ub);
+				SetLGParameters(projY_tDriftL_ang[i], fp0_tDriftL.fp, fp0_tDriftL.ehfp, fp0_tDriftL.elfp, fp0_tDriftL.lb, fp0_tDriftL.ub);
+				SetLGParameters(projY_tDriftR_ang[i], fp0_tDriftR.fp, fp0_tDriftR.ehfp, fp0_tDriftR.elfp, fp0_tDriftR.lb, fp0_tDriftR.ub);
 
-				SetLGParameters(projY_xDrift_ang[i+angBins/2], fp1_xDrift.fp, fp1_xDrift.efp, fp1_xDrift.lb, fp1_xDrift.ub);
-				SetLGParameters(projY_tDriftL_ang[i+angBins/2], fp1_tDriftL.fp, fp1_tDriftL.efp, fp1_tDriftL.lb, fp1_tDriftL.ub);
-				SetLGParameters(projY_tDriftR_ang[i+angBins/2], fp1_tDriftR.fp, fp1_tDriftR.efp, fp1_tDriftR.lb, fp1_tDriftR.ub);
+				SetLGParameters(projY_xDrift_ang[i+angBins/2], fp1_xDrift.fp, fp1_xDrift.ehfp, fp1_xDrift.elfp, fp1_xDrift.lb, fp1_xDrift.ub);
+				SetLGParameters(projY_tDriftL_ang[i+angBins/2], fp1_tDriftL.fp, fp1_tDriftL.ehfp, fp1_tDriftL.elfp, fp1_tDriftL.lb, fp1_tDriftL.ub);
+				SetLGParameters(projY_tDriftR_ang[i+angBins/2], fp1_tDriftR.fp, fp1_tDriftR.ehfp, fp1_tDriftR.elfp, fp1_tDriftR.lb, fp1_tDriftR.ub);
 
-				LGfit_xDrift_ang[i] = fitter(projY_xDrift_ang[i], fp0_xDrift.lb, fp0_xDrift.ub, fp0_xDrift.fp, fp0_xDrift.efp, fp0_xDrift.cov, "LG");
-				LGfit_tDriftL_ang[i] = fitter(projY_tDriftL_ang[i], fp0_tDriftL.lb, fp0_tDriftL.ub, fp0_tDriftL.fp, fp0_tDriftL.efp, fp0_tDriftL.cov, "LG");
-				LGfit_tDriftR_ang[i] = fitter(projY_tDriftR_ang[i], fp0_tDriftR.lb, fp0_tDriftR.ub, fp0_tDriftR.fp, fp0_tDriftR.efp, fp0_tDriftR.cov, "LG");
+				LGfit_xDrift_ang[i] = fitter(projY_xDrift_ang[i], fp0_xDrift.lb, fp0_xDrift.ub, fp0_xDrift.fp, fp0_xDrift.ehfp, fp0_xDrift.elfp, fp0_xDrift.cov, "LG");
+				LGfit_tDriftL_ang[i] = fitter(projY_tDriftL_ang[i], fp0_tDriftL.lb, fp0_tDriftL.ub, fp0_tDriftL.fp, fp0_tDriftL.ehfp, fp0_tDriftL.elfp, fp0_tDriftL.cov, "LG");
+				LGfit_tDriftR_ang[i] = fitter(projY_tDriftR_ang[i], fp0_tDriftR.lb, fp0_tDriftR.ub, fp0_tDriftR.fp, fp0_tDriftR.ehfp, fp0_tDriftR.elfp, fp0_tDriftR.cov, "LG");
 
-				LGfit_xDrift_ang[i+angBins/2] = fitter(projY_xDrift_ang[i+angBins/2], fp1_xDrift.lb, fp1_xDrift.ub, fp1_xDrift.fp, fp1_xDrift.efp, fp1_xDrift.cov, "LG");
-				LGfit_tDriftL_ang[i+angBins/2] = fitter(projY_tDriftL_ang[i+angBins/2], fp1_tDriftL.lb, fp1_tDriftL.ub, fp1_tDriftL.fp, fp1_tDriftL.efp, fp1_tDriftL.cov, "LG");
-				LGfit_tDriftR_ang[i+angBins/2] = fitter(projY_tDriftR_ang[i+angBins/2], fp1_tDriftR.lb, fp1_tDriftR.ub, fp1_tDriftR.fp, fp1_tDriftR.efp, fp1_tDriftR.cov, "LG");
+				LGfit_xDrift_ang[i+angBins/2] = fitter(projY_xDrift_ang[i+angBins/2], fp1_xDrift.lb, fp1_xDrift.ub, fp1_xDrift.fp, fp1_xDrift.ehfp, fp1_xDrift.elfp, fp1_xDrift.cov, "LG");
+				LGfit_tDriftL_ang[i+angBins/2] = fitter(projY_tDriftL_ang[i+angBins/2], fp1_tDriftL.lb, fp1_tDriftL.ub, fp1_tDriftL.fp, fp1_tDriftL.ehfp, fp1_tDriftL.elfp, fp1_tDriftL.cov, "LG");
+				LGfit_tDriftR_ang[i+angBins/2] = fitter(projY_tDriftR_ang[i+angBins/2], fp1_tDriftR.lb, fp1_tDriftR.ub, fp1_tDriftR.fp, fp1_tDriftR.ehfp, fp1_tDriftR.elfp, fp1_tDriftR.cov, "LG");
 
 				if(fp0_xDrift.fp[1] >= 0.){
 
 					MPVplot_xDrift_ang[i]->SetPoint(MPVplot_xDrift_ang[i]->GetN(), h_dQdx_xDrift_ang[i]->GetXaxis()->GetBinCenter(j), fp0_xDrift.fp[1]);
-					MPVplot_xDrift_ang[i]->SetPointError(MPVplot_xDrift_ang[i]->GetN() - 1, 0., pointError(projY_xDrift_ang[i], fp0_xDrift));
+					MPVplot_xDrift_ang[i]->SetPointError(MPVplot_xDrift_ang[i]->GetN() - 1, 0., 0., -1*fp0_xDrift.elfp[1], fp0_xDrift.ehfp[1]);
 				}
 
 				if(fp0_tDriftL.fp[1] >= 0.){
 
 					MPVplot_tDriftL_ang[i]->SetPoint(MPVplot_tDriftL_ang[i]->GetN(), h_dQdx_tDriftL_ang[i]->GetXaxis()->GetBinCenter(j), fp0_tDriftL.fp[1]);
-					MPVplot_tDriftL_ang[i]->SetPointError(MPVplot_tDriftL_ang[i]->GetN() - 1, 0., pointError(projY_tDriftL_ang[i], fp0_tDriftL));
+					MPVplot_tDriftL_ang[i]->SetPointError(MPVplot_tDriftL_ang[i]->GetN() - 1, 0., 0., -1*fp0_tDriftL.elfp[1], fp0_tDriftL.ehfp[1]);
 				}
 
 				if(fp0_tDriftR.fp[1] >= 0.){
 
 					MPVplot_tDriftR_ang[i]->SetPoint(MPVplot_tDriftR_ang[i]->GetN(), h_dQdx_tDriftR_ang[i]->GetXaxis()->GetBinCenter(j), fp0_tDriftR.fp[1]);
-					MPVplot_tDriftR_ang[i]->SetPointError(MPVplot_tDriftR_ang[i]->GetN() - 1, 0., pointError(projY_tDriftR_ang[i], fp0_tDriftR));
+					MPVplot_tDriftR_ang[i]->SetPointError(MPVplot_tDriftR_ang[i]->GetN() - 1, 0., 0., -1*fp0_tDriftR.elfp[1], fp0_tDriftR.ehfp[1]);
 				}
 
 				if(fp1_xDrift.fp[1] >= 0.){
 
 					MPVplot_xDrift_ang[i+angBins/2]->SetPoint(MPVplot_xDrift_ang[i+angBins/2]->GetN(), h_dQdx_xDrift_ang[i+angBins/2]->GetXaxis()->GetBinCenter(j), fp1_xDrift.fp[1]);
-					MPVplot_xDrift_ang[i+angBins/2]->SetPointError(MPVplot_xDrift_ang[i+angBins/2]->GetN() - 1, 0., pointError(projY_xDrift_ang[i+angBins/2], fp1_xDrift));
+					MPVplot_xDrift_ang[i+angBins/2]->SetPointError(MPVplot_xDrift_ang[i+angBins/2]->GetN() - 1, 0., 0., -1*fp1_xDrift.elfp[1], fp1_xDrift.ehfp[1]);
 				}
 
 				if(fp1_tDriftL.fp[1] >= 0.){
 
 					MPVplot_tDriftL_ang[i+angBins/2]->SetPoint(MPVplot_tDriftL_ang[i+angBins/2]->GetN(), h_dQdx_tDriftL_ang[i+angBins/2]->GetXaxis()->GetBinCenter(j), fp1_tDriftL.fp[1]);
-					MPVplot_tDriftL_ang[i+angBins/2]->SetPointError(MPVplot_tDriftL_ang[i+angBins/2]->GetN() - 1, 0., pointError(projY_tDriftL_ang[i+angBins/2], fp1_tDriftL));
+					MPVplot_tDriftL_ang[i+angBins/2]->SetPointError(MPVplot_tDriftL_ang[i+angBins/2]->GetN() - 1, 0., 0., -1*fp1_tDriftL.elfp[1], fp1_tDriftL.ehfp[1]);
 				}
 
 				if(fp1_tDriftR.fp[1] >= 0.){
 
 					MPVplot_tDriftR_ang[i+angBins/2]->SetPoint(MPVplot_tDriftR_ang[i+angBins/2]->GetN(), h_dQdx_tDriftR_ang[i+angBins/2]->GetXaxis()->GetBinCenter(j), fp1_tDriftR.fp[1]);
-					MPVplot_tDriftR_ang[i+angBins/2]->SetPointError(MPVplot_tDriftR_ang[i+angBins/2]->GetN() - 1, 0., pointError(projY_tDriftR_ang[i+angBins/2], fp1_tDriftR));
+					MPVplot_tDriftR_ang[i+angBins/2]->SetPointError(MPVplot_tDriftR_ang[i+angBins/2]->GetN() - 1, 0., 0., -1*fp1_tDriftR.elfp[1], fp1_tDriftR.ehfp[1]);
 				}
 
 			}
@@ -584,17 +584,17 @@ int main(int argc, char**argv) {
 		fitLGParameters fp0_tDriftL, fp1_tDriftL;
 		fitLGParameters fp0_tDriftR, fp1_tDriftR;
 
-		TGraphErrors *MPVplot_xDrift_angWire[angBins][maxWireGroup];
-		TGraphErrors *MPVplot_tDriftL_angWire[angBins][maxWireGroup];
-		TGraphErrors *MPVplot_tDriftR_angWire[angBins][maxWireGroup];
+		TGraphAsymmErrors *MPVplot_xDrift_angWire[angBins][maxWireGroup];
+		TGraphAsymmErrors *MPVplot_tDriftL_angWire[angBins][maxWireGroup];
+		TGraphAsymmErrors *MPVplot_tDriftR_angWire[angBins][maxWireGroup];
 
 		for(int i = 0; i < angBins; i++){
 
 			for(int j = 1; j <= maxWireGroup; j++){
 
-				MPVplot_xDrift_angWire[i][j-1] = new TGraphErrors(); 
-				MPVplot_tDriftL_angWire[i][j-1] = new TGraphErrors();
-				MPVplot_tDriftR_angWire[i][j-1] = new TGraphErrors();
+				MPVplot_xDrift_angWire[i][j-1] = new TGraphAsymmErrors(); 
+				MPVplot_tDriftL_angWire[i][j-1] = new TGraphAsymmErrors();
+				MPVplot_tDriftR_angWire[i][j-1] = new TGraphAsymmErrors();
 
 			}
 
@@ -638,56 +638,56 @@ int main(int argc, char**argv) {
 
 					}
 
-					SetLGParameters(projY_xDrift_angWire[i][j-1], fp0_xDrift.fp, fp0_xDrift.efp, fp0_xDrift.lb, fp0_xDrift.ub);
-					SetLGParameters(projY_tDriftL_angWire[i][j-1], fp0_tDriftL.fp, fp0_tDriftL.efp, fp0_tDriftL.lb, fp0_tDriftL.ub);
-					SetLGParameters(projY_tDriftR_angWire[i][j-1], fp0_tDriftR.fp, fp0_tDriftR.efp, fp0_tDriftR.lb, fp0_tDriftR.ub);
+					SetLGParameters(projY_xDrift_angWire[i][j-1], fp0_xDrift.fp, fp0_xDrift.ehfp, fp0_xDrift.elfp, fp0_xDrift.lb, fp0_xDrift.ub);
+					SetLGParameters(projY_tDriftL_angWire[i][j-1], fp0_tDriftL.fp, fp0_tDriftL.ehfp, fp0_tDriftL.elfp, fp0_tDriftL.lb, fp0_tDriftL.ub);
+					SetLGParameters(projY_tDriftR_angWire[i][j-1], fp0_tDriftR.fp, fp0_tDriftR.ehfp, fp0_tDriftR.elfp, fp0_tDriftR.lb, fp0_tDriftR.ub);
 
-					SetLGParameters(projY_xDrift_angWire[i+angBins/2][j-1], fp1_xDrift.fp, fp1_xDrift.efp, fp1_xDrift.lb, fp1_xDrift.ub);
-					SetLGParameters(projY_tDriftL_angWire[i+angBins/2][j-1], fp1_tDriftL.fp, fp1_tDriftL.efp, fp1_tDriftL.lb, fp1_tDriftL.ub);
-					SetLGParameters(projY_tDriftR_angWire[i+angBins/2][j-1], fp1_tDriftR.fp, fp1_tDriftR.efp, fp1_tDriftR.lb, fp1_tDriftR.ub);
+					SetLGParameters(projY_xDrift_angWire[i+angBins/2][j-1], fp1_xDrift.fp, fp1_xDrift.ehfp, fp1_xDrift.elfp, fp1_xDrift.lb, fp1_xDrift.ub);
+					SetLGParameters(projY_tDriftL_angWire[i+angBins/2][j-1], fp1_tDriftL.fp, fp1_tDriftL.ehfp, fp1_tDriftL.elfp, fp1_tDriftL.lb, fp1_tDriftL.ub);
+					SetLGParameters(projY_tDriftR_angWire[i+angBins/2][j-1], fp1_tDriftR.fp, fp1_tDriftR.ehfp, fp1_tDriftR.elfp, fp1_tDriftR.lb, fp1_tDriftR.ub);
 
-					LGfit_xDrift_angWire[i][j-1] = fitter(projY_xDrift_angWire[i][j-1], fp0_xDrift.lb, fp0_xDrift.ub, fp0_xDrift.fp, fp0_xDrift.efp, fp0_xDrift.cov, "LG");
-					LGfit_tDriftL_angWire[i][j-1] = fitter(projY_tDriftL_angWire[i][j-1], fp0_tDriftL.lb, fp0_tDriftL.ub, fp0_tDriftL.fp, fp0_tDriftL.efp, fp0_tDriftL.cov, "LG");
-					LGfit_tDriftR_angWire[i][j-1] = fitter(projY_tDriftR_angWire[i][j-1], fp0_tDriftR.lb, fp0_tDriftR.ub, fp0_tDriftR.fp, fp0_tDriftR.efp, fp0_tDriftR.cov, "LG");
+					LGfit_xDrift_angWire[i][j-1] = fitter(projY_xDrift_angWire[i][j-1], fp0_xDrift.lb, fp0_xDrift.ub, fp0_xDrift.fp, fp0_xDrift.ehfp, fp0_xDrift.elfp, fp0_xDrift.cov, "LG");
+					LGfit_tDriftL_angWire[i][j-1] = fitter(projY_tDriftL_angWire[i][j-1], fp0_tDriftL.lb, fp0_tDriftL.ub, fp0_tDriftL.fp, fp0_tDriftL.ehfp, fp0_tDriftL.elfp, fp0_tDriftL.cov, "LG");
+					LGfit_tDriftR_angWire[i][j-1] = fitter(projY_tDriftR_angWire[i][j-1], fp0_tDriftR.lb, fp0_tDriftR.ub, fp0_tDriftR.fp, fp0_tDriftR.ehfp, fp0_tDriftR.elfp, fp0_tDriftR.cov, "LG");
 
-					LGfit_xDrift_angWire[i+angBins/2][j-1] = fitter(projY_xDrift_angWire[i+angBins/2][j-1], fp1_xDrift.lb, fp1_xDrift.ub, fp1_xDrift.fp, fp1_xDrift.efp, fp1_xDrift.cov, "LG");
-					LGfit_tDriftL_angWire[i+angBins/2][j-1] = fitter(projY_tDriftL_angWire[i+angBins/2][j-1], fp1_tDriftL.lb, fp1_tDriftL.ub, fp1_tDriftL.fp, fp1_tDriftL.efp, fp1_tDriftL.cov, "LG");
-					LGfit_tDriftR_angWire[i+angBins/2][j-1] = fitter(projY_tDriftR_angWire[i+angBins/2][j-1], fp1_tDriftR.lb, fp1_tDriftR.ub, fp1_tDriftR.fp, fp1_tDriftR.efp, fp1_tDriftR.cov, "LG");
+					LGfit_xDrift_angWire[i+angBins/2][j-1] = fitter(projY_xDrift_angWire[i+angBins/2][j-1], fp1_xDrift.lb, fp1_xDrift.ub, fp1_xDrift.fp, fp1_xDrift.ehfp, fp1_xDrift.elfp, fp1_xDrift.cov, "LG");
+					LGfit_tDriftL_angWire[i+angBins/2][j-1] = fitter(projY_tDriftL_angWire[i+angBins/2][j-1], fp1_tDriftL.lb, fp1_tDriftL.ub, fp1_tDriftL.fp, fp1_tDriftL.ehfp, fp1_tDriftL.elfp, fp1_tDriftL.cov, "LG");
+					LGfit_tDriftR_angWire[i+angBins/2][j-1] = fitter(projY_tDriftR_angWire[i+angBins/2][j-1], fp1_tDriftR.lb, fp1_tDriftR.ub, fp1_tDriftR.fp, fp1_tDriftR.ehfp, fp1_tDriftR.elfp, fp1_tDriftR.cov, "LG");
 
 					if(fp0_xDrift.fp[1] >= 0.){
 
 						MPVplot_xDrift_angWire[i][j-1]->SetPoint(MPVplot_xDrift_angWire[i][j-1]->GetN(), h_dQdx_xDrift_angWire[i][j-1]->GetXaxis()->GetBinCenter(k), fp0_xDrift.fp[1]);
-						MPVplot_xDrift_angWire[i][j-1]->SetPointError(MPVplot_xDrift_angWire[i][j-1]->GetN() - 1, 0., pointError(projY_xDrift_angWire[i][j-1], fp0_xDrift));
+						MPVplot_xDrift_angWire[i][j-1]->SetPointError(MPVplot_xDrift_angWire[i][j-1]->GetN() - 1, 0., 0., -1*fp0_xDrift.elfp[1], fp0_xDrift.ehfp[1]);
 					}
 
 					if(fp0_tDriftL.fp[1] >= 0.){
 
 						MPVplot_tDriftL_angWire[i][j-1]->SetPoint(MPVplot_tDriftL_angWire[i][j-1]->GetN(), h_dQdx_tDriftL_angWire[i][j-1]->GetXaxis()->GetBinCenter(k), fp0_tDriftL.fp[1]);
-						MPVplot_tDriftL_angWire[i][j-1]->SetPointError(MPVplot_tDriftL_angWire[i][j-1]->GetN() - 1, 0., pointError(projY_tDriftL_angWire[i][j-1], fp0_tDriftL));
+						MPVplot_tDriftL_angWire[i][j-1]->SetPointError(MPVplot_tDriftL_angWire[i][j-1]->GetN() - 1, 0., 0., -1*fp0_tDriftL.elfp[1], fp0_tDriftL.ehfp[1]);
 					}
 
 					if(fp0_tDriftR.fp[1] >= 0.){
 
 						MPVplot_tDriftR_angWire[i][j-1]->SetPoint(MPVplot_tDriftR_angWire[i][j-1]->GetN(), h_dQdx_tDriftR_angWire[i][j-1]->GetXaxis()->GetBinCenter(k), fp0_tDriftR.fp[1]);
-						MPVplot_tDriftR_angWire[i][j-1]->SetPointError(MPVplot_tDriftR_angWire[i][j-1]->GetN() - 1, 0., pointError(projY_tDriftR_angWire[i][j-1], fp0_tDriftR));
+						MPVplot_tDriftR_angWire[i][j-1]->SetPointError(MPVplot_tDriftR_angWire[i][j-1]->GetN() - 1, 0., 0., -1*fp0_tDriftR.elfp[1], fp0_tDriftR.ehfp[1]);
 					}
 
 					if(fp1_xDrift.fp[1] >= 0.){
 
 						MPVplot_xDrift_angWire[i+angBins/2][j-1]->SetPoint(MPVplot_xDrift_angWire[i+angBins/2][j-1]->GetN(), h_dQdx_xDrift_angWire[i+angBins/2][j-1]->GetXaxis()->GetBinCenter(k), fp1_xDrift.fp[1]);
-						MPVplot_xDrift_angWire[i+angBins/2][j-1]->SetPointError(MPVplot_xDrift_angWire[i+angBins/2][j-1]->GetN() - 1, 0., pointError(projY_xDrift_angWire[i+angBins/2][j-1], fp1_xDrift));
+						MPVplot_xDrift_angWire[i+angBins/2][j-1]->SetPointError(MPVplot_xDrift_angWire[i+angBins/2][j-1]->GetN() - 1, 0., 0., -1*fp1_xDrift.elfp[1], fp1_xDrift.ehfp[1]);
 					}
 
 					if(fp1_tDriftL.fp[1] >= 0.){
 
 						MPVplot_tDriftL_angWire[i+angBins/2][j-1]->SetPoint(MPVplot_tDriftL_angWire[i+angBins/2][j-1]->GetN(), h_dQdx_tDriftL_angWire[i+angBins/2][j-1]->GetXaxis()->GetBinCenter(k), fp1_tDriftL.fp[1]);
-						MPVplot_tDriftL_angWire[i+angBins/2][j-1]->SetPointError(MPVplot_tDriftL_angWire[i+angBins/2][j-1]->GetN() - 1, 0., pointError(projY_tDriftL_angWire[i+angBins/2][j-1], fp1_tDriftL));
+						MPVplot_tDriftL_angWire[i+angBins/2][j-1]->SetPointError(MPVplot_tDriftL_angWire[i+angBins/2][j-1]->GetN() - 1, 0., 0., -1*fp1_tDriftL.elfp[1], fp1_tDriftL.ehfp[1]);
 					}
 
 					if(fp1_tDriftR.fp[1] >= 0.){
 
 						MPVplot_tDriftR_angWire[i+angBins/2][j-1]->SetPoint(MPVplot_tDriftR_angWire[i+angBins/2][j-1]->GetN(), h_dQdx_tDriftR_angWire[i+angBins/2][j-1]->GetXaxis()->GetBinCenter(k), fp1_tDriftR.fp[1]);
-						MPVplot_tDriftR_angWire[i+angBins/2][j-1]->SetPointError(MPVplot_tDriftR_angWire[i+angBins/2][j-1]->GetN() - 1, 0., pointError(projY_tDriftR_angWire[i+angBins/2][j-1], fp1_tDriftR));
+						MPVplot_tDriftR_angWire[i+angBins/2][j-1]->SetPointError(MPVplot_tDriftR_angWire[i+angBins/2][j-1]->GetN() - 1, 0., 0., -1*fp1_tDriftR.elfp[1], fp1_tDriftR.ehfp[1]);
 					}
 
 				}
@@ -745,17 +745,17 @@ int main(int argc, char**argv) {
 		fitLGParameters fp_tDriftL;
 		fitLGParameters fp_tDriftR;
 
-		TGraphErrors* MPVplot_xDriftL_oct[4];
-		TGraphErrors* MPVplot_xDriftR_oct[4];
-		TGraphErrors* MPVplot_tDriftL_oct[4];
-		TGraphErrors* MPVplot_tDriftR_oct[4];
+		TGraphAsymmErrors* MPVplot_xDriftL_oct[4];
+		TGraphAsymmErrors* MPVplot_xDriftR_oct[4];
+		TGraphAsymmErrors* MPVplot_tDriftL_oct[4];
+		TGraphAsymmErrors* MPVplot_tDriftR_oct[4];
 
 		for(int i = 1; i <= 4; i++){
 
-			MPVplot_xDriftL_oct[i-1] = new TGraphErrors();
-			MPVplot_xDriftR_oct[i-1] = new TGraphErrors();
-			MPVplot_tDriftL_oct[i-1] = new TGraphErrors();
-			MPVplot_tDriftR_oct[i-1] = new TGraphErrors();
+			MPVplot_xDriftL_oct[i-1] = new TGraphAsymmErrors();
+			MPVplot_xDriftR_oct[i-1] = new TGraphAsymmErrors();
+			MPVplot_tDriftL_oct[i-1] = new TGraphAsymmErrors();
+			MPVplot_tDriftR_oct[i-1] = new TGraphAsymmErrors();
 
 		}
 
@@ -780,11 +780,11 @@ int main(int argc, char**argv) {
 			
 				}
 
-				SetLGParameters(projY_xDriftL_oct[i-1], fp_xDriftL.fp, fp_xDriftL.efp, fp_xDriftL.lb, fp_xDriftL.ub);
-				SetLGParameters(projY_xDriftR_oct[i-1], fp_xDriftR.fp, fp_xDriftR.efp, fp_xDriftR.lb, fp_xDriftR.ub);
+				SetLGParameters(projY_xDriftL_oct[i-1], fp_xDriftL.fp, fp_xDriftL.ehfp, fp_xDriftL.elfp, fp_xDriftL.lb, fp_xDriftL.ub);
+				SetLGParameters(projY_xDriftR_oct[i-1], fp_xDriftR.fp, fp_xDriftR.ehfp, fp_xDriftR.elfp, fp_xDriftR.lb, fp_xDriftR.ub);
 				
-				LGfit_xDriftL_oct[i-1] = fitter(projY_xDriftL_oct[i-1], fp_xDriftL.lb, fp_xDriftL.ub, fp_xDriftL.fp, fp_xDriftL.efp, fp_xDriftL.cov, "LG");
-				LGfit_xDriftR_oct[i-1] = fitter(projY_xDriftR_oct[i-1], fp_xDriftR.lb, fp_xDriftR.ub, fp_xDriftR.fp, fp_xDriftR.efp, fp_xDriftR.cov, "LG");
+				LGfit_xDriftL_oct[i-1] = fitter(projY_xDriftL_oct[i-1], fp_xDriftL.lb, fp_xDriftL.ub, fp_xDriftL.fp, fp_xDriftL.ehfp, fp_xDriftL.elfp, fp_xDriftL.cov, "LG");
+				LGfit_xDriftR_oct[i-1] = fitter(projY_xDriftR_oct[i-1], fp_xDriftR.lb, fp_xDriftR.ub, fp_xDriftR.fp, fp_xDriftR.ehfp, fp_xDriftR.elfp, fp_xDriftR.cov, "LG");
 
 				if((bool)writeProjY){
 
@@ -799,13 +799,13 @@ int main(int argc, char**argv) {
 				if(fp_xDriftL.fp[1] >= 0.){
 
 					MPVplot_xDriftL_oct[i-1]->SetPoint(MPVplot_xDriftL_oct[i-1]->GetN(), h_dQdx_xDriftL_oct[i-1]->GetXaxis()->GetBinCenter(j), fp_xDriftL.fp[1]);
-					MPVplot_xDriftL_oct[i-1]->SetPointError(MPVplot_xDriftL_oct[i-1]->GetN() - 1, 0., pointError(projY_xDriftL_oct[i-1], fp_xDriftL));
+					MPVplot_xDriftL_oct[i-1]->SetPointError(MPVplot_xDriftL_oct[i-1]->GetN() - 1, 0., 0., -1*fp_xDriftL.elfp[1], fp_xDriftL.ehfp[1]);
 				}
 
 				if(fp_xDriftR.fp[1] >= 0.){
 
 					MPVplot_xDriftR_oct[i-1]->SetPoint(MPVplot_xDriftR_oct[i-1]->GetN(), h_dQdx_xDriftR_oct[i-1]->GetXaxis()->GetBinCenter(j), fp_xDriftR.fp[1]);
-					MPVplot_xDriftR_oct[i-1]->SetPointError(MPVplot_xDriftR_oct[i-1]->GetN() - 1, 0., pointError(projY_xDriftR_oct[i-1], fp_xDriftR));
+					MPVplot_xDriftR_oct[i-1]->SetPointError(MPVplot_xDriftR_oct[i-1]->GetN() - 1, 0., 0., -1*fp_xDriftR.elfp[1], fp_xDriftR.ehfp[1]);
 				}
 
 			}
@@ -834,11 +834,11 @@ int main(int argc, char**argv) {
 			
 				}
 
-				SetLGParameters(projY_tDriftL_oct[i-1], fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.lb, fp_tDriftL.ub);
-				SetLGParameters(projY_tDriftR_oct[i-1], fp_tDriftR.fp, fp_tDriftR.efp, fp_tDriftR.lb, fp_tDriftR.ub);
+				SetLGParameters(projY_tDriftL_oct[i-1], fp_tDriftL.fp, fp_tDriftL.ehfp, fp_tDriftL.elfp, fp_tDriftL.lb, fp_tDriftL.ub);
+				SetLGParameters(projY_tDriftR_oct[i-1], fp_tDriftR.fp, fp_tDriftR.ehfp, fp_tDriftR.elfp, fp_tDriftR.lb, fp_tDriftR.ub);
 				
-				LGfit_tDriftL_oct[i-1] = fitter(projY_tDriftL_oct[i-1], fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.cov, "LG");
-				LGfit_tDriftR_oct[i-1] = fitter(projY_tDriftR_oct[i-1], fp_tDriftR.lb, fp_tDriftR.ub, fp_tDriftR.fp, fp_tDriftR.efp, fp_tDriftR.cov, "LG");
+				LGfit_tDriftL_oct[i-1] = fitter(projY_tDriftL_oct[i-1], fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.ehfp, fp_tDriftL.elfp, fp_tDriftL.cov, "LG");
+				LGfit_tDriftR_oct[i-1] = fitter(projY_tDriftR_oct[i-1], fp_tDriftR.lb, fp_tDriftR.ub, fp_tDriftR.fp, fp_tDriftR.ehfp, fp_tDriftR.elfp, fp_tDriftR.cov, "LG");
 
 				if((bool)writeProjY){
 
@@ -853,13 +853,13 @@ int main(int argc, char**argv) {
 				if(fp_tDriftL.fp[1] >= 0.){
 
 					MPVplot_tDriftL_oct[i-1]->SetPoint(MPVplot_tDriftL_oct[i-1]->GetN(), h_dQdx_tDriftL_oct[i-1]->GetXaxis()->GetBinCenter(j), fp_tDriftL.fp[1]);
-					MPVplot_tDriftL_oct[i-1]->SetPointError(MPVplot_tDriftL_oct[i-1]->GetN() - 1, 0., pointError(projY_tDriftL_oct[i-1], fp_tDriftL));
+					MPVplot_tDriftL_oct[i-1]->SetPointError(MPVplot_tDriftL_oct[i-1]->GetN() - 1, 0., 0., -1*fp_tDriftL.elfp[1], fp_tDriftL.ehfp[1]);
 				}
 
 				if(fp_tDriftR.fp[1] >= 0.){
 
 					MPVplot_tDriftR_oct[i-1]->SetPoint(MPVplot_tDriftR_oct[i-1]->GetN(), h_dQdx_tDriftR_oct[i-1]->GetXaxis()->GetBinCenter(j), fp_tDriftR.fp[1]);
-					MPVplot_tDriftR_oct[i-1]->SetPointError(MPVplot_tDriftR_oct[i-1]->GetN() - 1, 0., pointError(projY_tDriftR_oct[i-1], fp_tDriftR));
+					MPVplot_tDriftR_oct[i-1]->SetPointError(MPVplot_tDriftR_oct[i-1]->GetN() - 1, 0., 0., -1*fp_tDriftR.elfp[1], fp_tDriftR.ehfp[1]);
 				}
 
 			}

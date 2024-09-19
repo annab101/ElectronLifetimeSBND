@@ -83,7 +83,7 @@ namespace calib {
         return f;
     }
 
-    void SetLGParameters(TH1D *h, Double_t *fp, Double_t *efp, Double_t &lb, Double_t &ub){
+    void SetLGParameters(TH1D *h, Double_t *fp, Double_t *ehfp, Double_t *elfp, Double_t &lb, Double_t &ub){
         //Adapted from Lan Nguyen's code which was adapted from Dom Barker's code etc.
 
         // Set fit parameters and errors  
@@ -99,10 +99,14 @@ namespace calib {
         fp[3] = rms / 10;  //GSigma typically smaller than distribution rms
         
         //Starting guesses for errors
-        efp[0] = max / 100 * 0.5; //0.5% of max dQdx value  	
-        efp[1] = max / 100 * 8;	// 8% of max dQdx value
-        efp[2] = area * 0.1;	
-        efp[3] = rms * 0.01;
+        ehfp[0] = max / 100 * 0.5; //0.5% of max dQdx value  	
+        ehfp[1] = max / 100 * 8;	// 8% of max dQdx value
+        ehfp[2] = area * 0.1;	
+        ehfp[3] = rms * 0.01;
+        elfp[0] = - max / 100 * 0.5; //0.5% of max dQdx value  	
+        elfp[1] = - max / 100 * 8;	// 8% of max dQdx value
+        elfp[2] = - area * 0.1;	
+        elfp[3] = - rms * 0.01;
     
         //Lower and upper bounds for fit: sufficient to find the peak of the distribution precisely,
         //whilst staying in high stats bins to reduce statistical fluctuations
@@ -125,7 +129,7 @@ namespace calib {
 
     }
 
-    TF1 *fitter(TH1D *h, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *fiterrors, Double_t *covmat, std::string funcName){
+    TF1 *fitter(TH1D *h, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *ehfp, Double_t *elfp, Double_t *covmat, std::string funcName){
 
         Double_t(*func)(Double_t *,Double_t *);
         int func_index;
@@ -157,37 +161,39 @@ namespace calib {
         
         if(func_index == 1 || func_index == 2){
             fitfunc->SetParameters(fitparams[0], fitparams[1]);
-            fitfunc->SetParError(0,fiterrors[0]);
-            fitfunc->SetParError(1,fiterrors[1]);
+            fitfunc->SetParError(0,ehfp[0]);
+            fitfunc->SetParError(1,ehfp[1]);
             fitfunc->SetParLimits(1,0.,25.);
             fitfunc->SetParNames("Norm","Lifetime");
         }
         else if(func_index == 3){
             fitfunc->SetParameters(fitparams[0], fitparams[1], fitparams[2], fitparams[3]);
-            fitfunc->SetParError(0,fiterrors[0]);
-            if (fiterrors[0]==0) fitfunc->FixParameter(0,fitparams[0]); //if scale parameter error is 0 scale parameter is fixed
-            fitfunc->SetParError(1,fiterrors[1]);
-            fitfunc->SetParError(2,fiterrors[2]);
-            fitfunc->SetParError(3,fiterrors[3]);
+            fitfunc->SetParError(0,ehfp[0]);
+            if (ehfp[0]==0) fitfunc->FixParameter(0,fitparams[0]); //if scale parameter error is 0 scale parameter is fixed
+            fitfunc->SetParError(1,ehfp[1]);
+            fitfunc->SetParError(2,ehfp[2]);
+            fitfunc->SetParError(3,ehfp[3]);
             fitfunc->SetParLimits(0,20,60);
             fitfunc->SetParLimits(3,10,200);
             fitfunc->SetParNames("Width","MPV","TotalArea","GSigma"); 
         }
 
-        h->Fit(FitFuncName,"LREQ");  //L = log likelihood method, E = error estimations using the Minos techniques, R = specied range, Q = quiet mode
+        TFitResultPtr r = h->Fit(FitFuncName,"LREQS");  //L = log likelihood method, E = error estimations using the Minos techniques, R = specied range, Q = quiet mode
         //Other fitting options https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html (7.1.1)
     
         TString fitOutcome = gMinuit->fCstatu.Data();
 
         for(int i = 0; i < nParams; i++){
             fitparams[i] = h->GetFunction(FitFuncName)->GetParameter(i);	
-            fiterrors[i] = h->GetFunction(FitFuncName)->GetParError(i);
+            ehfp[i] = r->UpperError(i);
+            elfp[i] = r->LowerError(i);
         }
 
         if (!fitOutcome.BeginsWith("SUCC")) { 
             for(int i = 0; i < nParams; i++){
                 fitparams[i] = -1000.0;	
-                fiterrors[i] = -1000.0;
+                ehfp[i] = -1000.0;
+                elfp[i] = 1000.0;
                 covmat[i] = -1000.0;
             } 
         }
@@ -196,7 +202,7 @@ namespace calib {
         
     }
 
-    TF1 *fitter(TGraphErrors *g, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *fiterrors, Double_t *covmat, std::string funcName){
+    TF1 *fitter(TGraphAsymmErrors *g, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *ehfp, Double_t *elfp, Double_t *covmat, std::string funcName){
 
         Double_t(*func)(Double_t *,Double_t *);
         int func_index;
@@ -233,44 +239,49 @@ namespace calib {
         
         if(func_index == 1 || func_index == 2){
             fitfunc->SetParameters(fitparams[0], fitparams[1]);
-            fitfunc->SetParError(0,fiterrors[0]);
-            fitfunc->SetParError(1,fiterrors[1]);
+            fitfunc->SetParError(0,ehfp[0]);
+            fitfunc->SetParError(1,ehfp[1]);
             fitfunc->SetParNames("Norm","Lifetime");
         }
         else if(func_index == 3){
             fitfunc->SetParameters(fitparams[0], fitparams[1], fitparams[2], fitparams[3]);
-            fitfunc->SetParError(0,fiterrors[0]);
-            if (fiterrors[0]==0) fitfunc->FixParameter(0,fitparams[0]); //if scale parameter error is 0 scale parameter is fixed
-            fitfunc->SetParError(1,fiterrors[1]);
-            fitfunc->SetParError(2,fiterrors[2]);
-            fitfunc->SetParError(3,fiterrors[3]);
+            fitfunc->SetParError(0,ehfp[0]);
+            if (ehfp[0]==0) fitfunc->FixParameter(0,fitparams[0]); //if scale parameter error is 0 scale parameter is fixed
+            fitfunc->SetParError(1,ehfp[1]);
+            fitfunc->SetParError(2,ehfp[2]);
+            fitfunc->SetParError(3,ehfp[3]);
             fitfunc->SetParLimits(0,20,60);
             fitfunc->SetParLimits(3,10,200);
             fitfunc->SetParNames("Width","MPV","TotalArea","GSigma"); 
         }
         else if(func_index == 4){
             fitfunc->SetParameters(fitparams[0], fitparams[1], fitparams[2]);
-            fitfunc->SetParError(0,fiterrors[0]);
-            fitfunc->SetParError(1,fiterrors[1]);
-            fitfunc->SetParError(2,fiterrors[2]);
+            fitfunc->SetParError(0,ehfp[0]);
+            fitfunc->SetParError(1,ehfp[1]);
+            fitfunc->SetParError(2,ehfp[2]);
             fitfunc->SetParLimits(0,0,100);
             fitfunc->SetParNames("Norm","Decay","Const");
         }
 
-        g->Fit(FitFuncName,"LREQ");  //L = log likelihood method, E = error estimations using the Minos techniques, R = specied range, Q = quiet mode
+        TFitResultPtr r = g->Fit(FitFuncName,"LREQS");  //L = log likelihood method, E = error estimations using the Minos techniques, R = specied range, Q = quiet mode
         //Other fitting options https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html (7.1.1)
     
         TString fitOutcome = gMinuit->fCstatu.Data();
 
         for(int i = 0; i < nParams; i++){
             fitparams[i] = g->GetFunction(FitFuncName)->GetParameter(i);	
-            fiterrors[i] = g->GetFunction(FitFuncName)->GetParError(i);
+            ehfp[i] = r->UpperError(i);
+            elfp[i] = r->LowerError(i);
+            std::cout << "parameter: " << r->Parameter(i) << std::endl;
+            std::cout << "upper error: " << ehfp[i] << std::endl;
+            std::cout << "lower error: " << elfp[i] << std::endl;
         }
 
         if (!fitOutcome.BeginsWith("SUCC")) { 
             for(int i = 0; i < nParams; i++){
                 fitparams[i] = -1000.0;	
-                fiterrors[i] = -1000.0;
+                ehfp[i] = -1000.0;
+                elfp[i] = 1000.0;
                 covmat[i] = -1000.0;
             } 
         }

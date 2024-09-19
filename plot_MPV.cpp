@@ -51,7 +51,7 @@ int main(int argc, char**argv) {
 			MPVmax = std::stoi(argv[i+1]);
 		}
 		if(!strcmp(argv[i], "--col")){
-			col = argv[i+1];
+			col = std::stoi(argv[i+1]);
 		}
 	}
 
@@ -66,6 +66,7 @@ int main(int argc, char**argv) {
 	std::string dataset = "noDataSet";
 	std::string saveLoc = "noSaveLoc";
     std::string configLabel = "noConfigLabel";
+	std::string plotFitLabel = "noFitLabel";
 
     p->getValue("tag", tag);
 	p->getValue("dataset", dataset);
@@ -73,6 +74,7 @@ int main(int argc, char**argv) {
 	p->getValue("codeConfig", codeConfig);
 
     configLabel = configMap[codeConfig];
+	plotFitLabel = plotFitName[plotFit];
 
     std::cout << configLabel << std::endl;
     
@@ -85,7 +87,7 @@ int main(int argc, char**argv) {
 
     if(distOrTime == 0){
 
-        TGraphErrors* MPVplot = (TGraphErrors*)f_MPV.Get(("MPVplot_xDrift_" + histName).c_str());
+        TGraphAsymmErrors* MPVplot = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_xDrift_" + histName).c_str());
         TF1* expoFitL = (TF1*)f_fit.Get(("MPVfit_xDriftL_" + histName).c_str());
         TF1* expoFitR = (TF1*)f_fit.Get(("MPVfit_xDriftR_" + histName).c_str());
 
@@ -99,7 +101,7 @@ int main(int argc, char**argv) {
 			c_plain->SetFrameLineColor(deepViolet);
 		}
 
-        setMarker<TGraphErrors>(MPVplot, 1, 20, 0.7);
+        setMarker<TGraphAsymmErrors>(MPVplot, 1, 20, 0.7);
 		MPVplot->SetTitle(";x (cm);dQ/dx MPV (ADC/cm)");
 		MPVplot->SetMinimum(MPVmin);
     	MPVplot->SetMaximum(MPVmax);
@@ -112,7 +114,7 @@ int main(int argc, char**argv) {
 			MPVplot->GetYaxis()->SetLabelColor(deepViolet);
 			MPVplot->GetYaxis()->SetTitleColor(deepViolet);
 		}
-		setFontSize<TGraphErrors>(MPVplot, 133, 25);
+		setFontSize<TGraphAsymmErrors>(MPVplot, 133, 30);
 		MPVplot->Draw("AP");
 		expoFitL->SetLineColor(coral);
 		expoFitL->SetLineWidth(4.0);
@@ -125,15 +127,15 @@ int main(int argc, char**argv) {
 			if(!plotFit){TPaveText *stats = statsBox({.34,.8,.63,.88}, track_count);stats->Draw();}
 		}
 
-		if(col){saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_colour_xDrift_" + histName + tag);}
-        if(!col){saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_xDrift_" + histName + tag);}
+		if(col){saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_colour_xDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
+        if(!col){saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_xDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
 
     }
 
     if(distOrTime == 1){
 
-        TGraphErrors* MPVplotL = (TGraphErrors*)f_MPV.Get(("MPVplot_tDriftL_" + histName).c_str());
-        TGraphErrors* MPVplotR = (TGraphErrors*)f_MPV.Get(("MPVplot_tDriftR_" + histName).c_str());
+        TGraphAsymmErrors* MPVplotL = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_tDriftL_" + histName).c_str());
+        TGraphAsymmErrors* MPVplotR = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_tDriftR_" + histName).c_str());
         TF1* expoFitL = (TF1*)f_fit.Get(("MPVfit_tDriftL_" + histName).c_str());
         TF1* expoFitR = (TF1*)f_fit.Get(("MPVfit_tDriftR_" + histName).c_str());
 
@@ -149,8 +151,12 @@ int main(int argc, char**argv) {
         c_split->cd();
         pad1->SetRightMargin(0.15);
         pad1->SetLeftMargin(0.18);
+		pad1->SetTopMargin(0.05);
+		pad1->SetBottomMargin(0.15);
         pad2->SetRightMargin(0.15);
         pad2->SetLeftMargin(0.18);
+		pad2->SetTopMargin(0.05);
+		pad2->SetBottomMargin(0.15);
 		if(col){
 			pad1->SetFillColor(powderBlue);
 			pad1->SetFillStyle(4100);
@@ -164,11 +170,11 @@ int main(int argc, char**argv) {
 			pad2->SetFrameFillStyle(4100);
 		}
 
-        setMarker<TGraphErrors>(MPVplotL, 1, 20, 0.7);
-		MPVplotL->SetTitle("East TPC;t (ms); dQ/dx MPV (ADC/cm)");
+        setMarker<TGraphAsymmErrors>(MPVplotL, 1, 20, 0.7);
+		MPVplotL->SetTitle(";t_{#scale[1.2]{drift}} (ms); dQ/dx MPV (ADC/cm)");
 		MPVplotL->SetMinimum(MPVmin);
     	MPVplotL->SetMaximum(MPVmax);
-		MPVplotL->GetYaxis()->SetNdivisions(505);
+		//MPVplotL->GetYaxis()->SetNdivisions(505);
 		if(col){
 			MPVplotL->GetXaxis()->SetAxisColor(deepViolet);
 			MPVplotL->GetXaxis()->SetLabelColor(deepViolet);
@@ -179,12 +185,11 @@ int main(int argc, char**argv) {
 		}
 		expoFitL->SetLineColor(coral);
 		expoFitL->SetLineWidth(4.0);
-		setFontSize<TGraphErrors>(MPVplotL, 133, 25);
-		setMarker<TGraphErrors>(MPVplotR, 1, 20, 0.7);
-		MPVplotR->SetTitle("West TPC;t (ms); dQ/dx MPV (ADC/cm)");
+		setFontSize<TGraphAsymmErrors>(MPVplotL, 133, 30);
+		setMarker<TGraphAsymmErrors>(MPVplotR, 1, 20, 0.7);
+		MPVplotR->SetTitle(";t_{#scale[1.2]{drift}} (ms); dQ/dx MPV (ADC/cm)");
 		MPVplotR->SetMinimum(MPVmin);
     	MPVplotR->SetMaximum(MPVmax);
-		MPVplotR->GetYaxis()->SetNdivisions(505);
 		if(col){
 			MPVplotR->GetXaxis()->SetAxisColor(deepViolet);
 			MPVplotR->GetXaxis()->SetLabelColor(deepViolet);
@@ -195,7 +200,7 @@ int main(int argc, char**argv) {
 		}
 		expoFitR->SetLineColor(kAzure - 3);
 		expoFitR->SetLineWidth(4.0);
-		setFontSize<TGraphErrors>(MPVplotR, 133, 25);
+		setFontSize<TGraphAsymmErrors>(MPVplotR, 133, 30);
 		
 		c_split->cd();		
 		pad1->Draw();		
@@ -216,8 +221,8 @@ int main(int argc, char**argv) {
 		if(!plotFit){TPaveText *statsR = statsBox({.45,.82,.80,.88}, track_count);statsR->Draw();}
 		}
 		
-        if(col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_colour_tDrift_" + histName + tag);}
-        if(!col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_tDrift_" + histName + tag);}
+        if(col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_colour_tDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
+        if(!col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_tDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
 
 		std::cout << track_count << std::endl;
 
