@@ -28,7 +28,7 @@ int main(int argc, char**argv) {
     std::string histName = "noHist";
 	int binNum = -1;
 	std::string LorR = "L";
-	int colour = 0;
+	int col = 0;
 
 	for(int i=0; i<argc; ++i){
 		if(!strcmp(argv[i], "--config")){
@@ -44,7 +44,7 @@ int main(int argc, char**argv) {
 			LorR = argv[i+1];
 		}
 		if(!strcmp(argv[i], "--col")){
-			colour = argv[i+1];
+			col = std::stoi(argv[i+1]);
 		}
 	}
 
@@ -95,7 +95,7 @@ int main(int argc, char**argv) {
 		projY->GetXaxis()->SetLabelColor(deepViolet);
 		projY->GetXaxis()->SetTitleColor(deepViolet);
 	}
-	setFontSize<TH1>(projY, 133, 25);
+	setFontSize<TH1>(projY, 133, 30);
 	projY->GetYaxis()->SetLabelOffset(0.01);
 	if(col){
 		projY->GetYaxis()->SetAxisColor(deepViolet);
@@ -110,7 +110,7 @@ int main(int argc, char**argv) {
  
 	TCanvas *c_plain = new TCanvas();
 	c_plain->SetLeftMargin(0.15);
-	c_plain->SetBottomMargin(0.12);
+	c_plain->SetBottomMargin(0.14);
 	if(col){
 		c_plain->SetFillColor(powderBlue);
 		c_plain->SetFillStyle(1001);
@@ -131,6 +131,45 @@ int main(int argc, char**argv) {
 	std::cout << "chisq: " << LGfit->GetChisquare() << std::endl;
 	std::cout << "NDoF: " << LGfit->GetNDF() << std::endl;
 
+	//Really illegal quick way to check the upper and lower error
+	fitLGParameters fp_tDriftL;
+	SetLGParameters(projY, fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.lb, fp_tDriftL.ub);
+	LGfit = fitter(projY, fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.cov, "LG");
+	Double_t lbound = fp_tDriftL.lb;
+	Double_t ubound = fp_tDriftL.ub;
+	Double_t(*func)(Double_t *,Double_t *);
+    int func_index;
+    int nParams;
+	func = langaufun;
+    func_index = 3;
+    nParams = 4;
+	Double_t *fitparams = fp_tDriftL.fp;
+	Double_t *fiterrors = fp_tDriftL.efp;
+    Char_t FitFuncName[100]; 
+    sprintf(FitFuncName,"Fitfcn_%s",projY->GetName());
+
+    TF1 *fitfunc = new TF1(FitFuncName,func,lbound,ubound, nParams);
+        
+    fitfunc->SetParameters(fitparams[0], fitparams[1], fitparams[2], fitparams[3]);
+	fitfunc->SetParError(0,fiterrors[0]);
+	if (fiterrors[0]==0) fitfunc->FixParameter(0,fitparams[0]); //if scale parameter error is 0 scale parameter is fixed
+	fitfunc->SetParError(1,fiterrors[1]);
+	fitfunc->SetParError(2,fiterrors[2]);
+	fitfunc->SetParError(3,fiterrors[3]);
+	fitfunc->SetParLimits(0,20,60);
+	fitfunc->SetParLimits(3,10,200);
+	fitfunc->SetParNames("Width","MPV","TotalArea","GSigma"); 
+        
+	TFitResultPtr r = projY->Fit(FitFuncName,"LRES");  //L = log likelihood method, E = error estimations using the Minos techniques, R = specied range, Q = quiet mode
+        //Other fitting options https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html (7.1.1)
+    
+    std::cout << r->Parameter(1) << std::endl;
+    std::cout << r->HasMinosError(1) << std::endl;
+    std::cout << r->UpperError(1) << std::endl;
+    std::cout << r->LowerError(1) << std::endl;
+
+	std::cout << "done" << std::endl;
+	
     return 0;
 
 }
