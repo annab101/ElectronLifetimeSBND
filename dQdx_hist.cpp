@@ -15,8 +15,6 @@
 #include "Helpers/PlottingHelpers.cpp"
 #include "Helpers/FittingHelpers.h"
 #include "Helpers/FittingHelpers.cpp"
-#include "Helpers/StatsHelpers.h"
-#include "Helpers/StatsHelpers.cpp"
 #include "Utilities/ConfigReader.h"
 #include "Utilities/ConfigReader.cpp"
 

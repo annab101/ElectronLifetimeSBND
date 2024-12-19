@@ -1,6 +1,6 @@
-inputData = /pnfs/sbnd/scratch/users/abeever/EWCosmicSCEandDiff/corsika_prodTest_noSCEtransDiff/genToReco/filesanaReco2.list
+inputData = /exp/sbnd/data/users/abeever/samweb2024B_CV/urls.list
 codeConfig = 1
-tag = v09_84_00_01
+tag = 2024BCVfull
 NBinsX = 100
 NBinsT = 100
 minX = -200.
@@ -18,8 +18,7 @@ expo_tDriftL_lb = 0.2
 expo_tDriftR_lb = 0.2
 expo_tDriftL_ub = 1.0
 expo_tDriftR_ub = 1.0
-angBins = 6
-writeProjY = 0
+maxWireGroup = 15
 
-dataset = noSCEtransDiff
+dataset = 2024BCVfull
 saveLoc = /exp/sbnd/data/users/abeever/cosmics_analysis/Lifetime/

@@ -102,7 +102,7 @@ int main(int argc, char**argv) {
 		}
 
         setMarker<TGraphAsymmErrors>(MPVplot, 1, 20, 0.7);
-		MPVplot->SetTitle(";x (cm);dQ/dx MPV (ADC/cm)");
+		MPVplot->SetTitle(";x (cm);dQ/dx MPV (Arb. Units)");
 		MPVplot->SetMinimum(MPVmin);
     	MPVplot->SetMaximum(MPVmax);
 		MPVplot->GetXaxis()->SetNdivisions(505);
@@ -171,7 +171,7 @@ int main(int argc, char**argv) {
 		}
 
         setMarker<TGraphAsymmErrors>(MPVplotL, 1, 20, 0.7);
-		MPVplotL->SetTitle(";t_{#scale[1.2]{drift}} (ms); dQ/dx MPV (ADC/cm)");
+		MPVplotL->SetTitle(";t_{#scale[1.2]{drift}} (ms); dQ/dx MPV (Arb. Units)");
 		MPVplotL->SetMinimum(MPVmin);
     	MPVplotL->SetMaximum(MPVmax);
 		//MPVplotL->GetYaxis()->SetNdivisions(505);
@@ -187,7 +187,7 @@ int main(int argc, char**argv) {
 		expoFitL->SetLineWidth(4.0);
 		setFontSize<TGraphAsymmErrors>(MPVplotL, 133, 30);
 		setMarker<TGraphAsymmErrors>(MPVplotR, 1, 20, 0.7);
-		MPVplotR->SetTitle(";t_{#scale[1.2]{drift}} (ms); dQ/dx MPV (ADC/cm)");
+		MPVplotR->SetTitle(";t_{#scale[1.2]{drift}} (ms); dQ/dx MPV (Arb. Units)");
 		MPVplotR->SetMinimum(MPVmin);
     	MPVplotR->SetMaximum(MPVmax);
 		if(col){

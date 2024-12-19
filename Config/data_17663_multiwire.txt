@@ -1,6 +1,6 @@
-inputData = /pnfs/sbnd/scratch/users/abeever/EWCosmicSCEandDiff/corsika_prodTest_noSCEtransDiff/genToReco/filesanaReco2.list
+inputData = /pnfs/sbnd/persistent/users/abeever/calib_data/run17663/filesanaXrootD.list
 codeConfig = 1
-tag = v09_84_00_01
+tag = v09_90_00_data
 NBinsX = 100
 NBinsT = 100
 minX = -200.
@@ -14,12 +14,13 @@ expo_xDriftL_lb = -160.
 expo_xDriftR_lb = 40.
 expo_xDriftL_ub = -40.
 expo_xDriftR_ub = 160.
-expo_tDriftL_lb = 0.2
-expo_tDriftR_lb = 0.2
+expo_tDriftL_lb = 0.1
+expo_tDriftR_lb = 0.1
 expo_tDriftL_ub = 1.0
 expo_tDriftR_ub = 1.0
-angBins = 6
-writeProjY = 0
+writeProjY = 1
+angBins = 8
+maxWireGroup = 15
 
-dataset = noSCEtransDiff
+dataset = run17663
 saveLoc = /exp/sbnd/data/users/abeever/cosmics_analysis/Lifetime/
