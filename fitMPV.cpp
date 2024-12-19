@@ -15,8 +15,6 @@
 #include "Helpers/PlottingHelpers.cpp"
 #include "Helpers/FittingHelpers.h"
 #include "Helpers/FittingHelpers.cpp"
-#include "Helpers/StatsHelpers.h"
-#include "Helpers/StatsHelpers.cpp"
 #include "Utilities/ConfigReader.h"
 #include "Utilities/ConfigReader.cpp"
 
@@ -124,6 +122,7 @@ int main(int argc, char**argv) {
 		expoFit_xDriftR = fitter(MPVplot_xDrift_basic, expoParams_xDriftR.lb, expoParams_xDriftR.ub, expoParams_xDriftR.fp, expoParams_xDriftR.ehfp, expoParams_xDriftR.elfp, expoParams_xDriftR.cov, "expoX");
 		std::cout << "fit tDrift L: " << std::endl;
 		expoFit_tDriftL = fitter(MPVplot_tDriftL_basic, expoParams_tDriftL.lb, expoParams_tDriftL.ub, expoParams_tDriftL.fp, expoParams_tDriftL.ehfp, expoParams_tDriftL.elfp, expoParams_tDriftL.cov, "expoT");
+		std::cout << "fit tDrift R: " << std::endl;
 		expoFit_tDriftR = fitter(MPVplot_tDriftR_basic, expoParams_tDriftR.lb, expoParams_tDriftR.ub, expoParams_tDriftR.fp, expoParams_tDriftR.ehfp, expoParams_tDriftR.elfp, expoParams_tDriftR.cov, "expoT");
 
 		expoFit_xDriftL->SetName("MPVfit_xDriftL_basic");
@@ -181,7 +180,9 @@ int main(int argc, char**argv) {
 
             expoFit_xDriftL = fitter(MPVplot_xDrift_wires, expoParams_xDriftL.lb, expoParams_xDriftL.ub, expoParams_xDriftL.fp, expoParams_xDriftL.ehfp, expoParams_xDriftL.elfp, expoParams_xDriftL.cov, "expoX");
 			expoFit_xDriftR = fitter(MPVplot_xDrift_wires, expoParams_xDriftR.lb, expoParams_xDriftR.ub, expoParams_xDriftR.fp, expoParams_xDriftR.ehfp, expoParams_xDriftR.elfp, expoParams_xDriftR.cov, "expoX");
+			std::cout << "tL" << std::endl;
 			expoFit_tDriftL = fitter(MPVplot_tDriftL_wires, expoParams_tDriftL.lb, expoParams_tDriftL.ub, expoParams_tDriftL.fp, expoParams_tDriftL.ehfp, expoParams_tDriftL.elfp, expoParams_tDriftL.cov, "expoT");
+			std::cout << "tR" << std::endl;
 			expoFit_tDriftR = fitter(MPVplot_tDriftR_wires, expoParams_tDriftR.lb, expoParams_tDriftR.ub, expoParams_tDriftR.fp, expoParams_tDriftR.ehfp, expoParams_tDriftR.elfp, expoParams_tDriftR.cov, "expoT");
 
             expoFit_xDriftL->SetName(TString::Format("MPVfit_xDriftL_%dwires", i));
