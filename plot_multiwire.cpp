@@ -14,8 +14,6 @@
 #include "Utilities/ConfigReader.cpp"
 #include "Helpers/FittingHelpers.h"
 #include "Helpers/FittingHelpers.cpp"
-#include "Helpers/StatsHelpers.h"
-#include "Helpers/StatsHelpers.cpp"
 
 using namespace calib;
 using namespace constants;
@@ -112,7 +110,7 @@ int main(int argc, char**argv) {
 	c_plain->BuildLegend(0.4,0.7,0.6,0.88);
 	saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_multiwire_" + tag);
 
-	TFile f00((saveLoc + dataset  + "_" + configLabel + "/multiwireExpos_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
+	/*TFile f00((saveLoc + dataset  + "_" + configLabel + "/multiwireExpos_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str(), "new");
 	f00.cd();
 
 	fitExpoConstParameters expoXL;
@@ -153,7 +151,7 @@ int main(int argc, char**argv) {
 	expoFitXL->Write();
 	expoFitXR->Write();
 	expoFitTL->Write();
-	expoFitTR->Write();
+	expoFitTR->Write();*/
 
     return 0;
 
