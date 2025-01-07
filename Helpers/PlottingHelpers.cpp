@@ -1,5 +1,7 @@
 #include "PlottingHelpers.h"
 
+using namespace constants;
+
 namespace calib {
     
     template<class T> void setMarker(T *t, Color_t color, Style_t style, Size_t size){
@@ -114,6 +116,48 @@ namespace calib {
         h->GetZaxis()->SetTitleSize(size);
         h->GetZaxis()->SetLabelFont(font);
         h->GetZaxis()->SetLabelSize(size);
+
+    }
+
+    void plotExp(std::string MPVfileName, std::vector<double> lifetimes, std::vector<int> colours, std::string plotSetup, std::string histName){
+        
+        TFile f((MPVfileName).c_str());
+        std::pair<std::string, std::pair<double,double>> thisSetup = whichSetup[plotSetup];
+        TF1 *expoFit = (TF1*)f.Get(("MPVfit_" + thisSetup.first + "_" + histName).c_str());
+        
+        if(strcmp(plotSetup.c_str(), "XL") == 0 || strcmp(plotSetup.c_str(), "XR") == 0){
+
+            for(int i=0; i < lifetimes.size(); i++){
+
+                auto expoFuncX = new TF1("f1",("[0]*exp(-((200-TMath::Abs(x))/([1]*" + std::to_string(vDrift) + ")))").c_str(), thisSetup.second.first, thisSetup.second.second);
+                expoFuncX->SetParameter(0, expoFit->GetParameter(0));
+                expoFuncX->SetParameter(1,lifetimes[i]);
+                expoFuncX->SetLineColor(colours[i]);
+                expoFuncX->SetLineWidth(3);
+                gStyle->SetLineStyleString(11,"20 20");
+                expoFuncX->SetLineStyle(11);
+                expoFuncX->Draw("same");
+
+            }
+
+        }
+        if(strcmp(plotSetup.c_str(), "TL") == 0 || strcmp(plotSetup.c_str(), "TR") == 0){
+
+            for(int i=0; i < lifetimes.size(); i++){
+
+                auto expoFuncT = new TF1("f1","[0]*exp(-(x/[1]))", thisSetup.second.first, thisSetup.second.second);
+                expoFuncT->SetParameter(0, expoFit->GetParameter(0));
+                expoFuncT->SetParameter(1,lifetimes[i]);
+                expoFuncT->SetLineColor(colours[i]);
+                expoFuncT->SetLineWidth(3);
+                gStyle->SetLineStyleString(11,"20 20");
+                expoFuncT->SetLineStyle(11);
+                expoFuncT->Draw("same");
+
+            }
+
+        }
+        
 
     }
 }

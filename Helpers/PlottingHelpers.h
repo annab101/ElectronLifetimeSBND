@@ -104,6 +104,17 @@ namespace calib {
     */
 
     void setFontSizeZ(TH2 *h, int font, int size);
+
+    /**
+    * @brief Add exponential to canvas.
+    *
+    * @param f The file with the lifetime fit in for the norm parameter
+    * @param lifetimes Vector of lifetime values to plot
+    * @param plotSetup Whether distance or time and L or R TPC
+    *
+    */
+
+    void plotExp(std::string MPVfileName, std::vector<double> lifetimes, std::vector<int> colours, std::string plotSetup, std::string histName);
 }
 
 #endif /* PLOTTINGHELPERS_H */
