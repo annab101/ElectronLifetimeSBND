@@ -18,6 +18,12 @@ To run the macros, set up sbndcode and then compile as
 g++ -o macro macro.cpp $(root-config --cflags --glibs) -lMinuit
 ```
 
+Run the macro as
+
+```bash
+./macro --config ../Config/YourConfigFileName.txt
+```
+
 ## Running
 
 Run lifetime analysis as 
