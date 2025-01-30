@@ -5,6 +5,7 @@ Code for measuring, analysing and plotting the electron lifetime from calibratio
 ## Structure
 
 * Main - contains the macros to measure the lifetime
+* Config - contains a config file for each lifetime measurement
 * Utilities - config reader script & ROOT includes
 * Helpers - useful functions & constants
 * Plot - various scripts for plotting various things (some more useful than others)
