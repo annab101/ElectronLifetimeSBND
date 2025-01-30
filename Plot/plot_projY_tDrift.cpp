@@ -5,18 +5,16 @@
 #include <iomanip>
 
 //ROOT includes
-#include "Utilities/ROOTincludes.h"
+#include "../Utilities/ROOTincludes.h"
 
 //Local includes
-#include "Helpers/Constants.h"
-#include "Helpers/PlottingHelpers.h"
-#include "Helpers/PlottingHelpers.cpp"
-#include "Utilities/ConfigReader.h"
-#include "Utilities/ConfigReader.cpp"
-#include "Helpers/FittingHelpers.h"
-#include "Helpers/FittingHelpers.cpp"
-#include "Helpers/StatsHelpers.h"
-#include "Helpers/StatsHelpers.cpp"
+#include "../Helpers/Constants.h"
+#include "../Helpers/PlottingHelpers.h"
+#include "../Helpers/PlottingHelpers.cpp"
+#include "../Utilities/ConfigReader.h"
+#include "../Utilities/ConfigReader.cpp"
+#include "../Helpers/FittingHelpers.h"
+#include "../Helpers/FittingHelpers.cpp"
 
 using namespace calib;
 using namespace constants;
@@ -55,12 +53,14 @@ int main(int argc, char**argv) {
 	std::cout << "-----------------------------------------------------------" << std::endl;
 
     int codeConfig = 0;
+	int nGroupedWires = 0;
     std::string tag = "noTag";
 	std::string dataset = "noDataSet";
 	std::string saveLoc = "noSaveLoc";
     std::string configLabel = "noConfigLabel";
 
     p->getValue("tag", tag);
+	p->getValue("nGroupedWires", nGroupedWires);
 	p->getValue("dataset", dataset);
 	p->getValue("saveLoc", saveLoc);
 	p->getValue("codeConfig", codeConfig);
@@ -69,8 +69,8 @@ int main(int argc, char**argv) {
 
     std::cout << configLabel << std::endl;
     
-	TFile f_hist((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-    TFile f_MPV((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
+	TFile f_hist((saveLoc + dataset  + "/dQdx_hist_" + std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".root").c_str());
+    TFile f_MPV((saveLoc + dataset + "/MPV_" + std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".root").c_str());
 
 	TH2D* h = (TH2D*)f_hist.Get(("h_dQdx_tDrift" + LorR + "_" + histName).c_str());
     TH1D* projY = (TH1D*)f_MPV.Get(("projY_tDrift" + LorR + "_" + histName + "_bin" + std::to_string(binNum)).c_str());
@@ -118,7 +118,7 @@ int main(int argc, char**argv) {
 	}
 	projY->Draw();
 	LGfit->Draw("same");
-	saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_projY_tDrift" + LorR + "_" + histName + tag + "bin" + std::to_string(binNum));
+	saveFig(c_plain, saveLoc + dataset + "/plot_projY_tDrift" + LorR + "_" + histName + tag + "bin" + std::to_string(binNum));
 
 	std::cout << "MPV: " << LGfit->GetParameter(1) << std::endl;
 	std::cout << "eMPV: " << LGfit->GetParError(1) << std::endl;
@@ -132,7 +132,7 @@ int main(int argc, char**argv) {
 	std::cout << "NDoF: " << LGfit->GetNDF() << std::endl;
 
 	//Really illegal quick way to check the upper and lower error
-	fitLGParameters fp_tDriftL;
+	/*fitLGParameters fp_tDriftL;
 	SetLGParameters(projY, fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.lb, fp_tDriftL.ub);
 	LGfit = fitter(projY, fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.efp, fp_tDriftL.cov, "LG");
 	Double_t lbound = fp_tDriftL.lb;
@@ -168,7 +168,7 @@ int main(int argc, char**argv) {
     std::cout << r->UpperError(1) << std::endl;
     std::cout << r->LowerError(1) << std::endl;
 
-	std::cout << "done" << std::endl;
+	std::cout << "done" << std::endl;*/
 	
     return 0;
 
