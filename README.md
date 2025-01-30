@@ -12,7 +12,7 @@ Code for measuring, analysing and plotting the electron lifetime from calibratio
 
 ## Setup
 
-To run the macros, set up sbndcode and then compile as 
+To run the macros in Main, set up sbndcode and then compile as 
 
 ```bash
 g++ -o macro macro.cpp $(root-config --cflags --glibs) -lMinuit
@@ -23,6 +23,8 @@ Run the macro as
 ```bash
 ./macro --config ../Config/YourConfigFileName.txt
 ```
+
+Macros in Plot are similar but probably have more command line inputs than just the config file.
 
 ## Running
 
