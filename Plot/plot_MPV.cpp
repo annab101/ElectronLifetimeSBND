@@ -4,14 +4,14 @@
 //C++ includes
 
 //ROOT includes
-#include "Utilities/ROOTincludes.h"
+#include "../Utilities/ROOTincludes.h"
 
 //Local includes
-#include "Helpers/Constants.h"
-#include "Helpers/PlottingHelpers.h"
-#include "Helpers/PlottingHelpers.cpp"
-#include "Utilities/ConfigReader.h"
-#include "Utilities/ConfigReader.cpp"
+#include "../Helpers/Constants.h"
+#include "../Helpers/PlottingHelpers.h"
+#include "../Helpers/PlottingHelpers.cpp"
+#include "../Utilities/ConfigReader.h"
+#include "../Utilities/ConfigReader.cpp"
 
 using namespace calib;
 using namespace constants;
@@ -62,6 +62,7 @@ int main(int argc, char**argv) {
 	std::cout << "-----------------------------------------------------------" << std::endl;
 
     int codeConfig = 0;
+	int nGroupedWires = 0;
     std::string tag = "noTag";
 	std::string dataset = "noDataSet";
 	std::string saveLoc = "noSaveLoc";
@@ -69,6 +70,7 @@ int main(int argc, char**argv) {
 	std::string plotFitLabel = "noFitLabel";
 
     p->getValue("tag", tag);
+	p->getValue("nGroupedWires", nGroupedWires);
 	p->getValue("dataset", dataset);
 	p->getValue("saveLoc", saveLoc);
 	p->getValue("codeConfig", codeConfig);
@@ -78,18 +80,18 @@ int main(int argc, char**argv) {
 
     std::cout << configLabel << std::endl;
     
-    TFile f_stats((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-    TFile f_MPV((saveLoc + dataset  + "_" + configLabel + "/MPV_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
-    TFile f_fit((saveLoc + dataset  + "_" + configLabel + "/MPVfit_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
+    TFile f_stats((saveLoc + dataset + "/dQdx_hist_" + std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".root").c_str());
+    TFile f_MPV((saveLoc + dataset + "/MPV_" + std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".root").c_str());
+    TFile f_fit((saveLoc + dataset + "/MPVfit_" + std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".root").c_str());
 
     TH2D* h_stats = (TH2D*)f_stats.Get("h_stats");
     int track_count = h_stats->GetEntries();
 
     if(distOrTime == 0){
 
-        TGraphAsymmErrors* MPVplot = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_xDrift_" + histName).c_str());
-        TF1* expoFitL = (TF1*)f_fit.Get(("MPVfit_xDriftL_" + histName).c_str());
-        TF1* expoFitR = (TF1*)f_fit.Get(("MPVfit_xDriftR_" + histName).c_str());
+        TGraphAsymmErrors* MPVplot = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_xDrift" + histName).c_str());
+        TF1* expoFitL = (TF1*)f_fit.Get("MPVfit_xDriftE");
+        TF1* expoFitR = (TF1*)f_fit.Get("MPVfit_xDriftW");
 
         TCanvas *c_plain = new TCanvas();
         c_plain->SetLeftMargin(0.15);
@@ -134,10 +136,12 @@ int main(int argc, char**argv) {
 
     if(distOrTime == 1){
 
-        TGraphAsymmErrors* MPVplotL = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_tDriftL_" + histName).c_str());
-        TGraphAsymmErrors* MPVplotR = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_tDriftR_" + histName).c_str());
-        TF1* expoFitL = (TF1*)f_fit.Get(("MPVfit_tDriftL_" + histName).c_str());
-        TF1* expoFitR = (TF1*)f_fit.Get(("MPVfit_tDriftR_" + histName).c_str());
+        TGraphAsymmErrors* MPVplotL = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_tDriftE_" + histName).c_str());
+        TGraphAsymmErrors* MPVplotR = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_tDriftW_" + histName).c_str());
+        TF1* expoFitL = (TF1*)f_fit.Get("MPVfit_tDriftE");
+        TF1* expoFitR = (TF1*)f_fit.Get("MPVfit_tDriftW");
+
+		std::cout << "segfault?" << std::endl;
 
         TCanvas *c_split = new TCanvas();
         c_split->SetWindowSize(2000,500);
@@ -170,10 +174,16 @@ int main(int argc, char**argv) {
 			pad2->SetFrameFillStyle(4100);
 		}
 
+		std::cout << "segfault?" << std::endl;
+
+
         setMarker<TGraphAsymmErrors>(MPVplotL, 1, 20, 0.7);
 		MPVplotL->SetTitle(";t_{#scale[1.2]{drift}} (ms); dQ/dx MPV (Arb. Units)");
 		MPVplotL->SetMinimum(MPVmin);
     	MPVplotL->SetMaximum(MPVmax);
+
+		std::cout << "segfault?" << std::endl;
+
 		//MPVplotL->GetYaxis()->SetNdivisions(505);
 		if(col){
 			MPVplotL->GetXaxis()->SetAxisColor(deepViolet);
@@ -185,11 +195,20 @@ int main(int argc, char**argv) {
 		}
 		expoFitL->SetLineColor(coral);
 		expoFitL->SetLineWidth(4.0);
+
+		std::cout << "segfault?" << std::endl;
+
 		setFontSize<TGraphAsymmErrors>(MPVplotL, 133, 30);
+
+		std::cout << "segfault?" << std::endl;
+
 		setMarker<TGraphAsymmErrors>(MPVplotR, 1, 20, 0.7);
 		MPVplotR->SetTitle(";t_{#scale[1.2]{drift}} (ms); dQ/dx MPV (Arb. Units)");
 		MPVplotR->SetMinimum(MPVmin);
     	MPVplotR->SetMaximum(MPVmax);
+
+		std::cout << "segfault here?" << std::endl;
+
 		if(col){
 			MPVplotR->GetXaxis()->SetAxisColor(deepViolet);
 			MPVplotR->GetXaxis()->SetLabelColor(deepViolet);
@@ -198,9 +217,18 @@ int main(int argc, char**argv) {
 			MPVplotR->GetYaxis()->SetLabelColor(deepViolet);
 			MPVplotR->GetYaxis()->SetTitleColor(deepViolet);
 		}
+
+		std::cout << "segfault hereish" << std::endl;
 		expoFitR->SetLineColor(kAzure - 3);
+		std::cout << "but why" << std::endl;
 		expoFitR->SetLineWidth(4.0);
+
+		std::cout << "this is the problem" << std::endl;
+		std::cout << "i am the problem" << std::endl;
 		setFontSize<TGraphAsymmErrors>(MPVplotR, 133, 30);
+
+		std::cout << "segfault?" << std::endl;
+
 		
 		c_split->cd();		
 		pad1->Draw();		
@@ -221,8 +249,8 @@ int main(int argc, char**argv) {
 		if(!plotFit){TPaveText *statsR = statsBox({.45,.82,.80,.88}, track_count);statsR->Draw();}
 		}
 		
-        if(col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_colour_tDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
-        if(!col){saveFig(c_split, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_tDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
+        if(col){saveFig(c_split, saveLoc + dataset + "/plot_MPV_colour_tDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
+        if(!col){saveFig(c_split, saveLoc + dataset  + "/plot_MPV_tDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
 
 		std::cout << track_count << std::endl;
 

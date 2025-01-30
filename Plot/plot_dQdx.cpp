@@ -4,14 +4,14 @@
 //C++ includes
 
 //ROOT includes
-#include "Utilities/ROOTincludes.h"
+#include "../Utilities/ROOTincludes.h"
 
 //Local includes
-#include "Helpers/Constants.h"
-#include "Helpers/PlottingHelpers.h"
-#include "Helpers/PlottingHelpers.cpp"
-#include "Utilities/ConfigReader.h"
-#include "Utilities/ConfigReader.cpp"
+#include "../Helpers/Constants.h"
+#include "../Helpers/PlottingHelpers.h"
+#include "../Helpers/PlottingHelpers.cpp"
+#include "../Utilities/ConfigReader.h"
+#include "../Utilities/ConfigReader.cpp"
 
 using namespace calib;
 using namespace constants;
@@ -19,7 +19,7 @@ using namespace cppsecrets;
 
 int main(int argc, char**argv) {
 
-    bool hideWirePlanes = 0;
+    bool hideWirePlanes = 1;
 
     Color_t actualWhite = TColor::GetFreeColorIndex();
     TColor *ci = new TColor(actualWhite, 1., 1., 1.);
@@ -43,12 +43,14 @@ int main(int argc, char**argv) {
 	std::cout << "-----------------------------------------------------------" << std::endl;
 
     int codeConfig = 0;
+    int nGroupedWires = 0;
 	std::string tag = "noTag";
 	std::string dataset = "noDataSet";
 	std::string saveLoc = "noSaveLoc";
     std::string configLabel = "noConfigLabel";
 
 	p->getValue("tag", tag);
+    p->getValue("nGroupedWires", nGroupedWires);
 	p->getValue("dataset", dataset);
 	p->getValue("saveLoc", saveLoc);
 	p->getValue("codeConfig", codeConfig);
@@ -57,7 +59,7 @@ int main(int argc, char**argv) {
 
     std::cout << configLabel << std::endl;
 
-    TFile f((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
+    TFile f((saveLoc + dataset + "/dQdx_hist_"+ std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".root").c_str());
 
     /*==============================================================
                     HISTOGRAMS FOR DRIFT DISTANCE
@@ -157,7 +159,7 @@ int main(int argc, char**argv) {
     
     labels->Draw();
     
-    saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_xDrift_" + dataset + " " + histName + " " + tag);
+    saveFig(c_plain, saveLoc + dataset + "/plot_dQdx_xDrift_" + dataset + " " + histName + " " + tag);
 
     /*==============================================================
                         HISTOGRAMS FOR DRIFT TIME
@@ -165,8 +167,8 @@ int main(int argc, char**argv) {
 
     TH2D *hL, *hR;
 
-    hL = (TH2D*)f.Get(("h_dQdx_tDriftL_" + histName).c_str());
-    hR = (TH2D*)f.Get(("h_dQdx_tDriftR_" + histName).c_str());
+    hL = (TH2D*)f.Get(("h_dQdx_tDriftE_" + histName).c_str());
+    hR = (TH2D*)f.Get(("h_dQdx_tDriftW_" + histName).c_str());
 
     TBox *anode = new TBox(0.0, 200, 0.06, 1800);
     TBox *cathode_tDrift = new TBox(1.24, 200, 1.3, 1800);
@@ -248,7 +250,7 @@ int main(int argc, char**argv) {
     TPaveText *labelsE = plotLabels({.18,.70,.46,.85}, SBNDlabelsE, actualWhite, 133,20);
     labelsE->Draw();
 
-    saveFig(c, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_tDriftE_" + dataset + " " + histName + " " + tag);
+    saveFig(c, saveLoc + dataset + "/plot_dQdx_tDriftE_" + dataset + " " + histName + " " + tag);
 
     openAndClear(c);
     c->SetLeftMargin(0.15);
@@ -275,7 +277,7 @@ int main(int argc, char**argv) {
     TPaveText *labelsW = plotLabels({.18,.70,.46,.85}, SBNDlabelsW, actualWhite, 133,20);
     labelsW->Draw();
     
-    saveFig(c, saveLoc + dataset  + "_" + configLabel + "/plot_dQdx_tDriftW_" + dataset + " " + histName + " " + tag);
+    saveFig(c, saveLoc + dataset + "/plot_dQdx_tDriftW_" + dataset + " " + histName + " " + tag);
     
 
     return 0;

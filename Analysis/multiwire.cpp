@@ -7,13 +7,13 @@
 #include "Utilities/ROOTincludes.h"
 
 //Local includes
-#include "Helpers/Constants.h"
-#include "Helpers/PlottingHelpers.h"
-#include "Helpers/PlottingHelpers.cpp"
-#include "Helpers/FittingHelpers.h"
-#include "Helpers/FittingHelpers.cpp"
-#include "Utilities/ConfigReader.h"
-#include "Utilities/ConfigReader.cpp"
+#include "../Helpers/Constants.h"
+#include "../Helpers/PlottingHelpers.h"
+#include "../Helpers/PlottingHelpers.cpp"
+#include "../Helpers/FittingHelpers.h"
+#include "../Helpers/FittingHelpers.cpp"
+#include "../Utilities/ConfigReader.h"
+#include "../Utilities/ConfigReader.cpp"
 
 using namespace calib;
 using namespace constants;
