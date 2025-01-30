@@ -69,4 +69,4 @@ For each lifetime measurement, add a config text file to the 'Config' folder. In
 | expo_tDriftW_lb    | lower bound for the lifetime fit in time in the West TPC    |
 | expo_tDriftE_ub    | upper bound for the lifetime fit in time in the East TPC    |
 | expo_tDriftW_ub    | upper bound for the lifetime fit in time in the West TPC    |
-| writeProjY    | Whether to save the y projection & LG fit in each bin (default = 0)    |
+| writeProjY    | whether to save the y projection & LG fit in each bin (default = 0)    |
