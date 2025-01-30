@@ -45,7 +45,7 @@ int main(int argc, char**argv) {
 	std::string saveLoc = "noSaveLoc";
 	
 	int choppyLim = -1;
-	int nGroupedWires = 0;
+	int nGroupedWires = 1;
 	int NBinsX = 100;
 	int NBinsT = 100;
 	int NBinsdQdx = 75;

@@ -45,7 +45,7 @@ int main(int argc, char**argv) {
 	std::string dataset = "noDataSet";
 	std::string saveLoc = "noSaveLoc";
 	
-	int nGroupedWires = 0;
+	int nGroupedWires = 1;
 	int NBinsX = 100;
 	int NBinsT = 100;
 	int NBinsdQdx = 75;
@@ -91,8 +91,8 @@ int main(int argc, char**argv) {
 	TF1* LGfit_tDriftW = new TF1();
 
 	fitLGParameters fp_xDrift;
-	fitLGParameters fp_tDriftL;
-	fitLGParameters fp_tDriftR;
+	fitLGParameters fp_tDriftE;
+	fitLGParameters fp_tDriftW;
 
 	TGraphAsymmErrors *MPVplot_xDrift = new TGraphAsymmErrors();
 	TGraphAsymmErrors *MPVplot_tDriftE = new TGraphAsymmErrors();
@@ -117,12 +117,12 @@ int main(int argc, char**argv) {
 		}
 
 		SetLGParameters(projY_xDrift, fp_xDrift.fp, fp_xDrift.ehfp, fp_xDrift.elfp, fp_xDrift.lb, fp_xDrift.ub);
-		SetLGParameters(projY_tDriftE, fp_tDriftL.fp, fp_tDriftL.ehfp, fp_tDriftL.elfp, fp_tDriftL.lb, fp_tDriftL.ub);
-		SetLGParameters(projY_tDriftW, fp_tDriftR.fp, fp_tDriftR.ehfp, fp_tDriftR.elfp, fp_tDriftR.lb, fp_tDriftR.ub);
+		SetLGParameters(projY_tDriftE, fp_tDriftE.fp, fp_tDriftE.ehfp, fp_tDriftE.elfp, fp_tDriftE.lb, fp_tDriftE.ub);
+		SetLGParameters(projY_tDriftW, fp_tDriftW.fp, fp_tDriftW.ehfp, fp_tDriftW.elfp, fp_tDriftW.lb, fp_tDriftW.ub);
 
 		LGfit_xDrift = fitter(projY_xDrift, fp_xDrift.lb, fp_xDrift.ub, fp_xDrift.fp, fp_xDrift.ehfp, fp_xDrift.elfp, fp_xDrift.cov, "LG");
-		LGfit_tDriftE = fitter(projY_tDriftE, fp_tDriftL.lb, fp_tDriftL.ub, fp_tDriftL.fp, fp_tDriftL.ehfp, fp_tDriftL.elfp, fp_tDriftL.cov, "LG");
-		LGfit_tDriftW = fitter(projY_tDriftW, fp_tDriftR.lb, fp_tDriftR.ub, fp_tDriftR.fp, fp_tDriftR.ehfp, fp_tDriftR.elfp, fp_tDriftR.cov, "LG");
+		LGfit_tDriftE = fitter(projY_tDriftE, fp_tDriftE.lb, fp_tDriftE.ub, fp_tDriftE.fp, fp_tDriftE.ehfp, fp_tDriftE.elfp, fp_tDriftE.cov, "LG");
+		LGfit_tDriftW = fitter(projY_tDriftW, fp_tDriftW.lb, fp_tDriftW.ub, fp_tDriftW.fp, fp_tDriftW.ehfp, fp_tDriftW.elfp, fp_tDriftW.cov, "LG");
 
 		if(fp_xDrift.fp[1] >= 0.){
 
@@ -130,16 +130,16 @@ int main(int argc, char**argv) {
 			MPVplot_xDrift->SetPointError(MPVplot_xDrift->GetN() - 1, 0., 0., -1*fp_xDrift.elfp[1], fp_xDrift.ehfp[1]);
 		}
 
-		if(fp_tDriftL.fp[1] >= 0.){
+		if(fp_tDriftE.fp[1] >= 0.){
 
-			MPVplot_tDriftE->SetPoint(MPVplot_tDriftE->GetN(), h_dQdx_tDriftE->GetXaxis()->GetBinCenter(i), fp_tDriftL.fp[1]);
-			MPVplot_tDriftE->SetPointError(MPVplot_tDriftE->GetN() - 1, 0., 0., -1*fp_tDriftL.elfp[1], fp_tDriftL.ehfp[1]);
+			MPVplot_tDriftE->SetPoint(MPVplot_tDriftE->GetN(), h_dQdx_tDriftE->GetXaxis()->GetBinCenter(i), fp_tDriftE.fp[1]);
+			MPVplot_tDriftE->SetPointError(MPVplot_tDriftE->GetN() - 1, 0., 0., -1*fp_tDriftE.elfp[1], fp_tDriftE.ehfp[1]);
 		}
 
-		if(fp_tDriftR.fp[1] >= 0.){
+		if(fp_tDriftW.fp[1] >= 0.){
 
-			MPVplot_tDriftW->SetPoint(MPVplot_tDriftW->GetN(), h_dQdx_tDriftW->GetXaxis()->GetBinCenter(i), fp_tDriftR.fp[1]);
-			MPVplot_tDriftW->SetPointError(MPVplot_tDriftW->GetN() - 1, 0., 0., -1*fp_tDriftR.elfp[1], fp_tDriftR.ehfp[1]);
+			MPVplot_tDriftW->SetPoint(MPVplot_tDriftW->GetN(), h_dQdx_tDriftW->GetXaxis()->GetBinCenter(i), fp_tDriftW.fp[1]);
+			MPVplot_tDriftW->SetPointError(MPVplot_tDriftW->GetN() - 1, 0., 0., -1*fp_tDriftW.elfp[1], fp_tDriftW.ehfp[1]);
 		}
 
 		if((bool)writeProjY){

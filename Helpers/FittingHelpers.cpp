@@ -272,9 +272,6 @@ namespace calib {
             fitparams[i] = g->GetFunction(FitFuncName)->GetParameter(i);	
             ehfp[i] = r->UpperError(i);
             elfp[i] = r->LowerError(i);
-            std::cout << "parameter: " << r->Parameter(i) << std::endl;
-            std::cout << "upper error: " << ehfp[i] << std::endl;
-            std::cout << "lower error: " << elfp[i] << std::endl;
         }
 
         if (!fitOutcome.BeginsWith("SUCC")) { 

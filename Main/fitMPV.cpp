@@ -3,6 +3,7 @@
 
 //C++ includes
 #include<fstream>
+#include<iostream>
 #include<filesystem>
 #include<valarray>
 
@@ -43,7 +44,7 @@ int main(int argc, char**argv) {
 	std::string tag = "noTag";
 	std::string dataset = "noDataSet";
 	std::string saveLoc = "noSaveLoc";
-	int nGroupedWires;
+	int nGroupedWires = 1;
 	double expo_xDriftE_lb = -160.;
     double expo_xDriftW_lb = 40.;
     double expo_xDriftE_ub = -40.;
@@ -69,6 +70,7 @@ int main(int argc, char**argv) {
 
 	TFile f((saveLoc + dataset  + "/MPV_" + std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".root").c_str());
 	TFile ff((saveLoc + dataset  + "/MPVfit_" + std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".root").c_str(), "new");
+	std::string textFile = saveLoc + dataset  + "/LifetimeValues_" + std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".txt";
 
 	TGraphAsymmErrors *MPVplot_xDrift = (TGraphAsymmErrors*)f.Get(TString::Format("MPVplot_xDrift_%dwires",nGroupedWires));
 	TGraphAsymmErrors *MPVplot_tDriftE = (TGraphAsymmErrors*)f.Get(TString::Format("MPVplot_tDriftE_%dwires",nGroupedWires));
@@ -111,9 +113,7 @@ int main(int argc, char**argv) {
 
 	expoFit_xDriftE = fitter(MPVplot_xDrift, expoParams_xDriftE.lb, expoParams_xDriftE.ub, expoParams_xDriftE.fp, expoParams_xDriftE.ehfp, expoParams_xDriftE.elfp, expoParams_xDriftE.cov, "expoX");
 	expoFit_xDriftW = fitter(MPVplot_xDrift, expoParams_xDriftW.lb, expoParams_xDriftW.ub, expoParams_xDriftW.fp, expoParams_xDriftW.ehfp, expoParams_xDriftW.elfp, expoParams_xDriftW.cov, "expoX");
-	std::cout << "fit tDrift L: " << std::endl;
 	expoFit_tDriftE = fitter(MPVplot_tDriftE, expoParams_tDriftE.lb, expoParams_tDriftE.ub, expoParams_tDriftE.fp, expoParams_tDriftE.ehfp, expoParams_tDriftE.elfp, expoParams_tDriftE.cov, "expoT");
-	std::cout << "fit tDrift R: " << std::endl;
 	expoFit_tDriftW = fitter(MPVplot_tDriftW, expoParams_tDriftW.lb, expoParams_tDriftW.ub, expoParams_tDriftW.fp, expoParams_tDriftW.ehfp, expoParams_tDriftW.elfp, expoParams_tDriftW.cov, "expoT");
 
 	expoFit_xDriftE->SetName("MPVfit_xDriftE");
@@ -127,6 +127,30 @@ int main(int argc, char**argv) {
 	expoFit_xDriftW->Write();
 	expoFit_tDriftE->Write();
 	expoFit_tDriftW->Write();
+
+	ofstream outFile;
+	outFile.open(textFile.c_str());
+	outFile << std::setw(20) << "TPC, dist/time  |  "
+			<< std::setw(20) << "etime  |  "
+			<< std::setw(20) << "error low  |  "
+			<< std::setw(20) << "error up  | \n"
+			<< std::setw(20) << "E, t  |  "
+			<< std::setw(15) << expoParams_tDriftE.fp[1] << "  |  "
+			<< std::setw(15) << expoParams_tDriftE.elfp[1] << "  |  "
+			<< std::setw(15) << expoParams_tDriftE.ehfp[1] << "  | \n"
+			<< std::setw(20) << "W, t  |  "
+			<< std::setw(15) << expoParams_tDriftW.fp[1] << "  |  "
+			<< std::setw(15) << expoParams_tDriftW.elfp[1] << "  |  "
+			<< std::setw(15) << expoParams_tDriftW.ehfp[1] << "  | \n"
+			<< std::setw(20) << "E, x  |  "
+			<< std::setw(15) << expoParams_xDriftE.fp[1] << "  |  "
+			<< std::setw(15) << expoParams_xDriftE.elfp[1] << "  |  "
+			<< std::setw(15) << expoParams_xDriftE.ehfp[1] << "  | \n"
+			<< std::setw(20) << "W, x  |  "
+			<< std::setw(15) << expoParams_xDriftW.fp[1] << "  |  "
+			<< std::setw(15) << expoParams_xDriftW.elfp[1] << "  |  "
+			<< std::setw(15) << expoParams_xDriftW.ehfp[1] << "  | \n";
+	outFile.close();
 
 	return 0;
 
