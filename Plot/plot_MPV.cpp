@@ -141,9 +141,7 @@ int main(int argc, char**argv) {
         TF1* expoFitL = (TF1*)f_fit.Get("MPVfit_tDriftE");
         TF1* expoFitR = (TF1*)f_fit.Get("MPVfit_tDriftW");
 
-		std::cout << "segfault?" << std::endl;
-
-        TCanvas *c_split = new TCanvas();
+		TCanvas *c_split = new TCanvas();
         c_split->SetWindowSize(2000,500);
 		if(col){
 			c_split->SetFillColor(powderBlue);
@@ -174,17 +172,11 @@ int main(int argc, char**argv) {
 			pad2->SetFrameFillStyle(4100);
 		}
 
-		std::cout << "segfault?" << std::endl;
-
-
-        setMarker<TGraphAsymmErrors>(MPVplotL, 1, 20, 0.7);
+		setMarker<TGraphAsymmErrors>(MPVplotL, 1, 20, 0.7);
 		MPVplotL->SetTitle(";t_{#scale[1.2]{drift}} (ms); dQ/dx MPV (Arb. Units)");
 		MPVplotL->SetMinimum(MPVmin);
     	MPVplotL->SetMaximum(MPVmax);
 
-		std::cout << "segfault?" << std::endl;
-
-		//MPVplotL->GetYaxis()->SetNdivisions(505);
 		if(col){
 			MPVplotL->GetXaxis()->SetAxisColor(deepViolet);
 			MPVplotL->GetXaxis()->SetLabelColor(deepViolet);
@@ -196,18 +188,12 @@ int main(int argc, char**argv) {
 		expoFitL->SetLineColor(coral);
 		expoFitL->SetLineWidth(4.0);
 
-		std::cout << "segfault?" << std::endl;
-
 		setFontSize<TGraphAsymmErrors>(MPVplotL, 133, 30);
-
-		std::cout << "segfault?" << std::endl;
 
 		setMarker<TGraphAsymmErrors>(MPVplotR, 1, 20, 0.7);
 		MPVplotR->SetTitle(";t_{#scale[1.2]{drift}} (ms); dQ/dx MPV (Arb. Units)");
 		MPVplotR->SetMinimum(MPVmin);
     	MPVplotR->SetMaximum(MPVmax);
-
-		std::cout << "segfault here?" << std::endl;
 
 		if(col){
 			MPVplotR->GetXaxis()->SetAxisColor(deepViolet);
@@ -218,16 +204,10 @@ int main(int argc, char**argv) {
 			MPVplotR->GetYaxis()->SetTitleColor(deepViolet);
 		}
 
-		std::cout << "segfault hereish" << std::endl;
 		expoFitR->SetLineColor(kAzure - 3);
-		std::cout << "but why" << std::endl;
 		expoFitR->SetLineWidth(4.0);
 
-		std::cout << "this is the problem" << std::endl;
-		std::cout << "i am the problem" << std::endl;
 		setFontSize<TGraphAsymmErrors>(MPVplotR, 133, 30);
-
-		std::cout << "segfault?" << std::endl;
 
 		
 		c_split->cd();		
