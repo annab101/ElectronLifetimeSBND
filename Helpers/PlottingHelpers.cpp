@@ -30,9 +30,20 @@ namespace calib {
         
     }
 
-    TPaveText *statsBox(std::vector<double> pos, int track_count, TF1* f1, TF1* f2){
+    TPaveText *statsBox(std::vector<double> pos, int track_count, TF1* f1, TF1* f2, TFitResult* r1, TFitResult* r2){
 	
         TPaveText *pt = new TPaveText(pos[0], pos[1], pos[2], pos[3], "blNDC");
+
+        //calculate lifetime from 1/lifetime
+
+        double tau1 = 1/f1->GetParameter(1);
+        double tau2 = 1/f2->GetParameter(1);
+
+        double elow1 = -((1/f1->GetParameter(1)) - (1/(f1->GetParameter(1) + r1->UpperError(1))));
+        double ehigh1 = ((1/(f1->GetParameter(1)+r1->LowerError(1))) - (1/f1->GetParameter(1)));
+
+        double elow2 = -((1/f2->GetParameter(1)) - (1/(f2->GetParameter(1) + r2->UpperError(1))));
+        double ehigh2 = ((1/(f2->GetParameter(1)+r2->LowerError(1))) - (1/f2->GetParameter(1)));
 
         pt->SetBorderSize(1);
         pt->SetFillColor(0);
@@ -40,19 +51,26 @@ namespace calib {
         ((TText*)pt->GetListOfLines()->Last())->SetTextColor(1);
         pt->AddText(Form("#chi^{2} / DoF: %g / %i",f1->GetChisquare(),f1->GetNDF()));
         ((TText*)pt->GetListOfLines()->Last())->SetTextColor(f1->GetLineColor());
-        pt->AddText(Form("#tau: %g#pm%g",f1->GetParameter(1),f1->GetParError(1)));
+        pt->AddText(Form("#tau: %.5f^{+%.5f}_{%.5f}",tau1,ehigh1,elow1));
         ((TText*)pt->GetListOfLines()->Last())->SetTextColor(f1->GetLineColor());
         pt->AddText(Form("#chi^{2} / DoF: %g / %i",f2->GetChisquare(),f2->GetNDF()));
         ((TText*)pt->GetListOfLines()->Last())->SetTextColor(f2->GetLineColor());
-        pt->AddText(Form("#tau: %g#pm%g",f2->GetParameter(1),f2->GetParError(1)));
+        pt->AddText(Form("#tau: %.5f^{+%.5f}_{%.5f}",tau2,ehigh2,elow2));
         ((TText*)pt->GetListOfLines()->Last())->SetTextColor(f2->GetLineColor());
         
         return pt;
     }
 
-    TPaveText *statsBox(std::vector<double> pos, int track_count, TF1* f1){
+    TPaveText *statsBox(std::vector<double> pos, int track_count, TF1* f1, TFitResult* r1){
         
         TPaveText *pt = new TPaveText(pos[0], pos[1], pos[2], pos[3], "blNDC");
+
+        //calculate lifetime from 1/lifetime
+
+        double tau1 = 1/f1->GetParameter(1);
+
+        double elow1 = -((1/f1->GetParameter(1)) - (1/(f1->GetParameter(1) + r1->UpperError(1))));
+        double ehigh1 = ((1/(f1->GetParameter(1)+r1->LowerError(1))) - (1/f1->GetParameter(1)));
 
         pt->SetBorderSize(1);
         pt->SetFillColor(0);
@@ -60,7 +78,7 @@ namespace calib {
         ((TText*)pt->GetListOfLines()->Last())->SetTextColor(1);
         pt->AddText(Form("#chi^{2} / DoF: %g / %i",f1->GetChisquare(),f1->GetNDF()));
         ((TText*)pt->GetListOfLines()->Last())->SetTextColor(f1->GetLineColor());
-        pt->AddText(Form("Lifetime: %g#pm%g",f1->GetParameter(1),f1->GetParError(1)));
+        pt->AddText(Form("#tau: %.5f^{+%.5f}_{%.5f}",tau1,ehigh1,elow1));
         ((TText*)pt->GetListOfLines()->Last())->SetTextColor(f1->GetLineColor());
         
         return pt;

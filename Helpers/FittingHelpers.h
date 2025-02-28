@@ -98,6 +98,17 @@ namespace calib {
     };
 
     /**
+    * Data structure to contain the TF1 from a fit as well as the TFitResultPtr
+    */
+
+    struct fitResult{
+        TF1 * myFitFunc;
+        TFitResultPtr myFitResult;
+    };
+
+
+
+    /**
     * @brief Landau-Gaussian convolution.
     *
     * @param x x
@@ -182,7 +193,7 @@ namespace calib {
     *
     */
 
-    TF1 *fitter(TH1D *h, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *ehfp, Double_t *elfp, Double_t *covmat, std::string funcName);
+    fitResult fitter(TH1D *h, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *ehfp, Double_t *elfp, Double_t *covmat, std::string funcName);
     
     /**
     * @brief Fit function to TGraphErrors and return fit.
@@ -198,7 +209,7 @@ namespace calib {
     *
     */
     
-    TF1 *fitter(TGraphErrors *g, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *ehfp, Double_t *elfp, Double_t *covmat, std::string funcName);
+    fitResult fitter(TGraphErrors *g, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *ehfp, Double_t *elfp, Double_t *covmat, std::string funcName);
 
     /**
     * @brief Function to find angular bin limits.

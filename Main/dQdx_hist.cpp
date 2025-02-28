@@ -172,7 +172,8 @@ int main(int argc, char**argv) {
 		treereader.Restart();
 		while(treereader.Next()){
 
-			if(*read_selected != 1 || (choppyLim > 0 && *read_event >= choppyLim) ){
+			if(*read_selected != 1 || (choppyLim > 0 && *read_event >= choppyLim)){
+				std::cout << "Not AC cosmic!" << std::endl;
 				continue;
 			}
 
