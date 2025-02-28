@@ -77,8 +77,6 @@ int main(int argc, char**argv) {
 
     configLabel = configMap[codeConfig];
 	plotFitLabel = plotFitName[plotFit];
-
-    std::cout << configLabel << std::endl;
     
     TFile f_stats((saveLoc + dataset + "/dQdx_hist_" + std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".root").c_str());
     TFile f_MPV((saveLoc + dataset + "/MPV_" + std::to_string(nGroupedWires) + "wires_" + dataset + "_" + tag + ".root").c_str());
@@ -87,13 +85,16 @@ int main(int argc, char**argv) {
     TH2D* h_stats = (TH2D*)f_stats.Get("h_stats");
     int track_count = h_stats->GetEntries();
 
-    if(distOrTime == 0){
+	if(distOrTime == 0){
 
-        TGraphAsymmErrors* MPVplot = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_xDrift" + histName).c_str());
+        TGraphAsymmErrors* MPVplot = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_xDrift_" + histName).c_str());
         TF1* expoFitL = (TF1*)f_fit.Get("MPVfit_xDriftE");
         TF1* expoFitR = (TF1*)f_fit.Get("MPVfit_xDriftW");
 
-        TCanvas *c_plain = new TCanvas();
+		TFitResult* expoFitLResult = (TFitResult*)f_fit.Get("MPVfit_xDriftE_fitResult");
+        TFitResult* expoFitRResult = (TFitResult*)f_fit.Get("MPVfit_xDriftW_fitResult");
+
+		TCanvas *c_plain = new TCanvas();
         c_plain->SetLeftMargin(0.15);
         c_plain->SetRightMargin(0.18);
         c_plain->SetBottomMargin(0.12);
@@ -103,7 +104,7 @@ int main(int argc, char**argv) {
 			c_plain->SetFrameLineColor(deepViolet);
 		}
 
-        setMarker<TGraphAsymmErrors>(MPVplot, 1, 20, 0.7);
+		setMarker<TGraphAsymmErrors>(MPVplot, 1, 20, 0.7);
 		MPVplot->SetTitle(";x (cm);dQ/dx MPV (Arb. Units)");
 		MPVplot->SetMinimum(MPVmin);
     	MPVplot->SetMaximum(MPVmax);
@@ -125,12 +126,12 @@ int main(int argc, char**argv) {
 		expoFitR->SetLineWidth(4.0);
 		if(plotFit){expoFitR->Draw("SAME");}
 		if(plotStats){
-			if(plotFit){TPaveText *stats = statsBox({.34,.62,.63,.88}, track_count, expoFitL, expoFitR);stats->Draw();}
+			if(plotFit){TPaveText *stats = statsBox({.34,.62,.63,.88}, track_count, expoFitL, expoFitR, expoFitLResult, expoFitRResult);stats->Draw();}
 			if(!plotFit){TPaveText *stats = statsBox({.34,.8,.63,.88}, track_count);stats->Draw();}
 		}
 
-		if(col){saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_colour_xDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
-        if(!col){saveFig(c_plain, saveLoc + dataset  + "_" + configLabel + "/plot_MPV_xDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
+		if(col){saveFig(c_plain, saveLoc + dataset + "/plot_MPV_colour_xDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
+        if(!col){saveFig(c_plain, saveLoc + dataset + "/plot_MPV_xDrift_" + histName + "_" + plotFitLabel + "_" + tag);}
 
     }
 
@@ -140,6 +141,8 @@ int main(int argc, char**argv) {
         TGraphAsymmErrors* MPVplotR = (TGraphAsymmErrors*)f_MPV.Get(("MPVplot_tDriftW_" + histName).c_str());
         TF1* expoFitL = (TF1*)f_fit.Get("MPVfit_tDriftE");
         TF1* expoFitR = (TF1*)f_fit.Get("MPVfit_tDriftW");
+		TFitResult* expoFitLResult = (TFitResult*)f_fit.Get("MPVfit_tDriftE_fitResult");
+        TFitResult* expoFitRResult = (TFitResult*)f_fit.Get("MPVfit_tDriftW_fitResult");
 
 		TCanvas *c_split = new TCanvas();
         c_split->SetWindowSize(2000,500);
@@ -216,7 +219,7 @@ int main(int argc, char**argv) {
 		MPVplotL->Draw("AP");	
 		if(plotFit){expoFitL->Draw("SAME");}
 		if(plotStats){
-			if(plotFit){TPaveText *statsL = statsBox({.45,.65,.80,.88}, track_count, expoFitL);statsL->Draw();}
+			if(plotFit){TPaveText *statsL = statsBox({.45,.65,.80,.88}, track_count, expoFitL, expoFitLResult);statsL->Draw();}
 			if(!plotFit){TPaveText *statsL = statsBox({.45,.82,.80,.88}, track_count);statsL->Draw();}
 		}
 		c_split->cd();
@@ -225,7 +228,7 @@ int main(int argc, char**argv) {
 		MPVplotR->Draw("AP");
 		if(plotFit){expoFitR->Draw("SAME");}
 		if(plotStats){
-		if(plotFit){TPaveText *statsR = statsBox({.45,.65,.80,.88}, track_count, expoFitR);statsR->Draw();}
+		if(plotFit){TPaveText *statsR = statsBox({.45,.65,.80,.88}, track_count, expoFitR, expoFitRResult);statsR->Draw();}
 		if(!plotFit){TPaveText *statsR = statsBox({.45,.82,.80,.88}, track_count);statsR->Draw();}
 		}
 		

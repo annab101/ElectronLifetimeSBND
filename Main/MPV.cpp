@@ -86,9 +86,9 @@ int main(int argc, char**argv) {
 	TH1D* projY_tDriftE = new TH1D();
 	TH1D* projY_tDriftW = new TH1D();
 
-	TF1* LGfit_xDrift = new TF1();
-	TF1* LGfit_tDriftE = new TF1();
-	TF1* LGfit_tDriftW = new TF1();
+	fitResult LGfit_xDrift;
+	fitResult LGfit_tDriftE;
+	fitResult LGfit_tDriftW;
 
 	fitLGParameters fp_xDrift;
 	fitLGParameters fp_tDriftE;
@@ -144,13 +144,21 @@ int main(int argc, char**argv) {
 
 		if((bool)writeProjY){
 
-			LGfit_xDrift->SetName(TString::Format("LGfit_xDrift_%dwires_bin%d",nGroupedWires,i));
-			LGfit_tDriftE->SetName(TString::Format("LGfit_tDriftE_%dwires_bin%d",nGroupedWires,i));
-			LGfit_tDriftW->SetName(TString::Format("LGfit_tDriftW_%dwires_bin%d",nGroupedWires,i));
+			LGfit_xDrift.myFitFunc->SetName(TString::Format("LGfit_xDrift_%dwires_bin%d",nGroupedWires,i));
+			LGfit_tDriftE.myFitFunc->SetName(TString::Format("LGfit_tDriftE_%dwires_bin%d",nGroupedWires,i));
+			LGfit_tDriftW.myFitFunc->SetName(TString::Format("LGfit_tDriftW_%dwires_bin%d",nGroupedWires,i));
 
-			LGfit_xDrift->Write();
-			LGfit_tDriftE->Write();
-			LGfit_tDriftW->Write();
+			LGfit_xDrift.myFitFunc->Write();
+			LGfit_tDriftE.myFitFunc->Write();
+			LGfit_tDriftW.myFitFunc->Write();
+
+			LGfit_xDrift.myFitResult->SetName(TString::Format("LGfit_xDrift_%dwires_bin%d_fitResult",nGroupedWires,i));
+			LGfit_tDriftE.myFitResult->SetName(TString::Format("LGfit_tDriftE_%dwires_bin%d_fitResult",nGroupedWires,i));
+			LGfit_tDriftW.myFitResult->SetName(TString::Format("LGfit_tDriftW_%dwires_bin%d_fitResult",nGroupedWires,i));
+
+			LGfit_xDrift.myFitResult->Write();
+			LGfit_tDriftE.myFitResult->Write();
+			LGfit_tDriftW.myFitResult->Write();
 
 		}
 

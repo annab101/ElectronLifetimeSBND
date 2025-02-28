@@ -85,10 +85,10 @@ int main(int argc, char**argv) {
 	fitExpoParameters expoParams_tDriftE;
 	fitExpoParameters expoParams_tDriftW;
 
-	TF1 *expoFit_xDriftE = new TF1();
-	TF1 *expoFit_xDriftW = new TF1();
-	TF1 *expoFit_tDriftE = new TF1();
-	TF1 *expoFit_tDriftW = new TF1();
+	fitResult expoFit_xDriftE;
+	fitResult expoFit_xDriftW;
+	fitResult expoFit_tDriftE;
+	fitResult expoFit_tDriftW;
 
 	expoParams_xDriftE.reset();
 	expoParams_xDriftW.reset();
@@ -116,40 +116,55 @@ int main(int argc, char**argv) {
 	expoFit_tDriftE = fitter(MPVplot_tDriftE, expoParams_tDriftE.lb, expoParams_tDriftE.ub, expoParams_tDriftE.fp, expoParams_tDriftE.ehfp, expoParams_tDriftE.elfp, expoParams_tDriftE.cov, "expoT");
 	expoFit_tDriftW = fitter(MPVplot_tDriftW, expoParams_tDriftW.lb, expoParams_tDriftW.ub, expoParams_tDriftW.fp, expoParams_tDriftW.ehfp, expoParams_tDriftW.elfp, expoParams_tDriftW.cov, "expoT");
 
-	expoFit_xDriftE->SetName("MPVfit_xDriftE");
-	expoFit_xDriftW->SetName("MPVfit_xDriftW");
-	expoFit_tDriftE->SetName("MPVfit_tDriftE");
-	expoFit_tDriftW->SetName("MPVfit_tDriftW");
+	expoFit_xDriftE.myFitFunc->SetName("MPVfit_xDriftE");
+	expoFit_xDriftW.myFitFunc->SetName("MPVfit_xDriftW");
+	expoFit_tDriftE.myFitFunc->SetName("MPVfit_tDriftE");
+	expoFit_tDriftW.myFitFunc->SetName("MPVfit_tDriftW");
+
+	expoFit_xDriftE.myFitResult->SetName("MPVfit_xDriftE_fitResult");
+	expoFit_xDriftW.myFitResult->SetName("MPVfit_xDriftW_fitResult");
+	expoFit_tDriftE.myFitResult->SetName("MPVfit_tDriftE_fitResult");
+	expoFit_tDriftW.myFitResult->SetName("MPVfit_tDriftW_fitResult");
 
 	std::cout << "-----Writing to file-----" << std::endl;
 	
-	expoFit_xDriftE->Write();
-	expoFit_xDriftW->Write();
-	expoFit_tDriftE->Write();
-	expoFit_tDriftW->Write();
+	expoFit_xDriftE.myFitFunc->Write();
+	expoFit_xDriftW.myFitFunc->Write();
+	expoFit_tDriftE.myFitFunc->Write();
+	expoFit_tDriftW.myFitFunc->Write();
+
+	expoFit_xDriftE.myFitResult->Write();
+	expoFit_xDriftW.myFitResult->Write();
+	expoFit_tDriftE.myFitResult->Write();
+	expoFit_tDriftW.myFitResult->Write();
 
 	ofstream outFile;
 	outFile.open(textFile.c_str());
-	outFile << std::setw(20) << "TPC, dist/time  |  "
-			<< std::setw(20) << "etime  |  "
+	outFile << std::setw(20) << "TPC  |  "
+			<< std::setw(20) << "1/etime  |  "
 			<< std::setw(20) << "error low  |  "
 			<< std::setw(20) << "error up  | \n"
-			<< std::setw(20) << "E, t  |  "
+			<< std::setw(20) << "E  |  "
 			<< std::setw(15) << expoParams_tDriftE.fp[1] << "  |  "
 			<< std::setw(15) << expoParams_tDriftE.elfp[1] << "  |  "
 			<< std::setw(15) << expoParams_tDriftE.ehfp[1] << "  | \n"
-			<< std::setw(20) << "W, t  |  "
+			<< std::setw(20) << "W  |  "
 			<< std::setw(15) << expoParams_tDriftW.fp[1] << "  |  "
 			<< std::setw(15) << expoParams_tDriftW.elfp[1] << "  |  "
 			<< std::setw(15) << expoParams_tDriftW.ehfp[1] << "  | \n"
-			<< std::setw(20) << "E, x  |  "
-			<< std::setw(15) << expoParams_xDriftE.fp[1] << "  |  "
-			<< std::setw(15) << expoParams_xDriftE.elfp[1] << "  |  "
-			<< std::setw(15) << expoParams_xDriftE.ehfp[1] << "  | \n"
-			<< std::setw(20) << "W, x  |  "
-			<< std::setw(15) << expoParams_xDriftW.fp[1] << "  |  "
-			<< std::setw(15) << expoParams_xDriftW.elfp[1] << "  |  "
-			<< std::setw(15) << expoParams_xDriftW.ehfp[1] << "  | \n";
+            << std::setw(20) << "TPC  |  "
+			<< std::setw(20) << "etime  |  "
+			<< std::setw(20) << "error low  |  "
+			<< std::setw(20) << "error up  | \n"
+			<< std::setw(20) << "E  |  "
+			<< std::setw(15) << 1/expoParams_tDriftE.fp[1] << "  |  "
+			<< std::setw(15) << -((1/expoParams_tDriftE.fp[1]) - (1/(expoParams_tDriftE.fp[1] + expoParams_tDriftE.ehfp[1]))) << "  |  "
+			<< std::setw(15) << ((1/(expoParams_tDriftE.fp[1]+expoParams_tDriftE.elfp[1])) - (1/expoParams_tDriftE.fp[1])) << "  | \n"
+			<< std::setw(20) << "W  |  "
+			<< std::setw(15) << 1/expoParams_tDriftW.fp[1] << "  |  "
+			<< std::setw(15) << -((1/expoParams_tDriftW.fp[1]) - (1/(expoParams_tDriftW.fp[1] + expoParams_tDriftW.ehfp[1]))) << "  |  "
+			<< std::setw(15) << ((1/(expoParams_tDriftW.fp[1]+expoParams_tDriftW.elfp[1])) - (1/expoParams_tDriftW.fp[1])) << "  | \n"
+            << "Note: 1/etime of -1000 means the fit did not work!\n";
 	outFile.close();
 
 	return 0;

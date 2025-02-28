@@ -65,21 +65,21 @@ namespace calib {
     double_t expofunX(Double_t *x, Double_t *par){
 
         Double_t xx = x[0];
-        Double_t f = par[0]*exp(-((200-TMath::Abs(xx))/(par[1]*vDrift)));
+        Double_t f = par[0]*exp(-((200-TMath::Abs(xx))/((1/par[1])*vDrift)));
         return f;
     }
 
     double_t expofunT(Double_t *x, Double_t *par){
 
         Double_t xx = x[0];
-        Double_t f = par[0]*exp(-(xx/par[1]));
+        Double_t f = par[0]*exp(-(xx*par[1]));
         return f;
     }
 
     double_t expofunConst(Double_t *x, Double_t *par){
 
         Double_t xx = x[0];
-        Double_t f = par[0]*exp(-(xx/par[1])) + par[2];
+        Double_t f = par[0]*exp(-(xx*par[1])) + par[2];
         return f;
     }
 
@@ -118,18 +118,20 @@ namespace calib {
 
     void SetExpoParameters(Double_t *fp){
         fp[0] = 1000.;
-        fp[1] = 10.;
+        fp[1] = 0.1;
 
     }
 
     void SetExpoConstParameters(Double_t *fp){
         fp[0] = 3.44;
-        fp[1] = 1.67;
+        fp[1] = 1.0;
         fp[2] = 11.;
 
     }
 
-    TF1 *fitter(TH1D *h, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *ehfp, Double_t *elfp, Double_t *covmat, std::string funcName){
+    fitResult fitter(TH1D *h, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *ehfp, Double_t *elfp, Double_t *covmat, std::string funcName){
+
+        fitResult postFit;
 
         Double_t(*func)(Double_t *,Double_t *);
         int func_index;
@@ -163,8 +165,7 @@ namespace calib {
             fitfunc->SetParameters(fitparams[0], fitparams[1]);
             fitfunc->SetParError(0,ehfp[0]);
             fitfunc->SetParError(1,ehfp[1]);
-            fitfunc->SetParLimits(1,0.,25.);
-            fitfunc->SetParNames("Norm","Lifetime");
+            fitfunc->SetParNames("Norm","1/Lifetime");
         }
         else if(func_index == 3){
             fitfunc->SetParameters(fitparams[0], fitparams[1], fitparams[2], fitparams[3]);
@@ -173,8 +174,6 @@ namespace calib {
             fitfunc->SetParError(1,ehfp[1]);
             fitfunc->SetParError(2,ehfp[2]);
             fitfunc->SetParError(3,ehfp[3]);
-            fitfunc->SetParLimits(0,20,60);
-            fitfunc->SetParLimits(3,10,200);
             fitfunc->SetParNames("Width","MPV","TotalArea","GSigma"); 
         }
 
@@ -198,11 +197,16 @@ namespace calib {
             } 
         }
 
-        return(fitfunc);
+        postFit.myFitFunc = fitfunc;
+        postFit.myFitResult = r;
+
+        return(postFit);
         
     }
 
-    TF1 *fitter(TGraphAsymmErrors *g, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *ehfp, Double_t *elfp, Double_t *covmat, std::string funcName){
+    fitResult fitter(TGraphAsymmErrors *g, Double_t lbound, Double_t ubound, Double_t *fitparams, Double_t *ehfp, Double_t *elfp, Double_t *covmat, std::string funcName){
+
+        fitResult postFit;
 
         Double_t(*func)(Double_t *,Double_t *);
         int func_index;
@@ -241,7 +245,7 @@ namespace calib {
             fitfunc->SetParameters(fitparams[0], fitparams[1]);
             fitfunc->SetParError(0,ehfp[0]);
             fitfunc->SetParError(1,ehfp[1]);
-            fitfunc->SetParNames("Norm","Lifetime");
+            fitfunc->SetParNames("Norm","1/Lifetime");
         }
         else if(func_index == 3){
             fitfunc->SetParameters(fitparams[0], fitparams[1], fitparams[2], fitparams[3]);
@@ -250,8 +254,6 @@ namespace calib {
             fitfunc->SetParError(1,ehfp[1]);
             fitfunc->SetParError(2,ehfp[2]);
             fitfunc->SetParError(3,ehfp[3]);
-            fitfunc->SetParLimits(0,20,60);
-            fitfunc->SetParLimits(3,10,200);
             fitfunc->SetParNames("Width","MPV","TotalArea","GSigma"); 
         }
         else if(func_index == 4){
@@ -259,7 +261,6 @@ namespace calib {
             fitfunc->SetParError(0,ehfp[0]);
             fitfunc->SetParError(1,ehfp[1]);
             fitfunc->SetParError(2,ehfp[2]);
-            fitfunc->SetParLimits(0,0,100);
             fitfunc->SetParNames("Norm","Decay","Const");
         }
 
@@ -283,7 +284,10 @@ namespace calib {
             } 
         }
 
-        return(fitfunc);
+        postFit.myFitFunc = fitfunc;
+        postFit.myFitResult = r;
+
+        return(postFit);
         
     }
 

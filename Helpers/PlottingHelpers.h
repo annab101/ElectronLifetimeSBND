@@ -48,7 +48,7 @@ namespace calib {
     *
     */
 
-    TPaveText *statsBox(std::vector<double> pos, int track_count, TF1* f1, TF1* f2);
+    TPaveText *statsBox(std::vector<double> pos, int track_count, TF1* f1, TF1* f2, TFitResult* r1, TFitResult* r2);
     
     /**
     * @brief Draw lifetime stats box for one function.
@@ -59,7 +59,7 @@ namespace calib {
     *
     */
 
-    TPaveText *statsBox(std::vector<double> pos, int track_count, TF1* f1);
+    TPaveText *statsBox(std::vector<double> pos, int track_count, TF1* f1, TFitResult* r1);
     
     /**
     * @brief Draw stats box with number of AC crossers.
