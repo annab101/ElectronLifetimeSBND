@@ -68,6 +68,7 @@ int main(int argc, char**argv) {
     TFile f((saveLoc + dataset  + "_" + configLabel + "/dQdx_hist_" + configLabel + "_" + dataset + "_" + tag + ".root").c_str());
     std::string MPVfileName = saveLoc + dataset  + "_" + configLabel + "/MPVfit_" + configLabel + "_" + dataset + "_" + tag + ".root";
 
+    //Root file with the bias scale factor from diffusion & SCE
     TFile f_bands("/exp/sbnd/data/users/abeever/cosmics_analysis/Lifetime/run14608choppyCut_classic/lifetimestudy.root");
 
     std::vector<double> lifetimes {3,10};
