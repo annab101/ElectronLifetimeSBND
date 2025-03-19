@@ -9,6 +9,7 @@ Code for measuring, analysing and plotting the electron lifetime from calibratio
 * Utilities - config reader script & ROOT includes
 * Helpers - useful functions & constants
 * Plot - various scripts for plotting various things (some more useful than others)
+* Nearline - the nearline macro
 * Analysis - old scripts & analysis stuff (mostly bad and hacky)
 
 ## Setup
