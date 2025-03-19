@@ -164,7 +164,8 @@ int main(int argc, char**argv) {
 			<< std::setw(15) << 1/expoParams_tDriftW.fp[1] << "  |  "
 			<< std::setw(15) << -((1/expoParams_tDriftW.fp[1]) - (1/(expoParams_tDriftW.fp[1] + expoParams_tDriftW.ehfp[1]))) << "  |  "
 			<< std::setw(15) << ((1/(expoParams_tDriftW.fp[1]+expoParams_tDriftW.elfp[1])) - (1/expoParams_tDriftW.fp[1])) << "  | \n"
-            << "Note: 1/etime of -1000 means the fit did not work!\n";
+            << "Note: 1/etime of -1000 means the fit did not work!\n"
+			<< "Be careful if 1/etime includes 0 or negative numbers within errors.\n";
 	outFile.close();
 
 	return 0;
